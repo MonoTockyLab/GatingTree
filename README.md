@@ -14,7 +14,9 @@
 7. [The Ono Lab (MonoTockyLab)](#7-the-ono-lab-monotockylab)
 8. [Contact and More](#8-contact-and-more)
 
+<a href="https://monotockylab.github.io/GatingTree/index.html">
 <img src="vignettes/assets/GatingTreeBanner1.jpg" align="center" width="90%">
+</a>
 
 ## 1. Introduction
 
