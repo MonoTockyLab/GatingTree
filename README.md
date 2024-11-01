@@ -16,7 +16,6 @@
 
 <img src="vignettes/assets/GatingTreeBanner1.jpg" align="center" width="90%">
 
-
 ## 1. Introduction
 
 Welcome to **GatingTree**, an R package developed to enhance the analysis of group-specific effects using cytometry data.
