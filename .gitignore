@@ -1,0 +1,65 @@
+# System files
+.DS_Store
+
+# R specific
+.Rhistory
+.RData
+.Ruserdata
+.Rproj.user/
+.Rproj
+.Rapp.history
+
+# R-Studio files
+.Rproj.user/
+.Rhistory
+.RData
+.Ruserdata
+.Rproj
+.Rapp.history
+
+# R Markdown output files
+.Rmd_checkpoints/
+.Rproj.user/
+.Rhistory
+.RData
+.Ruserdata
+.Rproj
+
+# Package build and check outputs
+.Rcheck/
+*.tar.gz
+*.Rcheck/
+*.log
+*.out
+*.Rd
+
+# User-specific files
+.Ruserdata
+.httr-oauth
+
+# Dependency directories
+packrat/
+renv/library/
+renv/local/
+
+# Log files (if any)
+*.log
+
+# Binary files produced by R
+*.so
+*.dll
+
+# Ignore specific environment files
+.env
+.secret
+
+# Ignore specific config files
+config.yml
+
+# Vignettes output folders and temporary files
+vignettes/*.html
+vignettes/*.pdf
+vignettes/lib/
+vignettes/figure/
+vignettes/figure-html/
+vignettes/cache/

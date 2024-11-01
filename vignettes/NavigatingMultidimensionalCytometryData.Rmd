@@ -1,0 +1,47 @@
+---
+title: "GatingTree: Navigating Multidimensional CytometryData"
+author: "Dr. Masahiro Ono"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+link-citations: TRUE
+vignette: >
+  %\VignetteIndexEntry{GatingTree: Navigating Multidimensional CytometryData}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+<img src="assets/MonoLab.jpg" align="right" width="40%" />
+<img src="assets/GatingTree_logo.jpg" align="center" width="50%" />
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 1. Introduction
+
+Welcome to **GatingTree**, an R package developed to enhance the analysis of complex cytometry data. As cytometry technologies evolve, they can analyze an increasing number of markers simultaneously, which introduces significant challenges in data analysis. Traditional methods like dimensional reduction and computational clustering are commonly used but can struggle with reproducibility and may not directly translate to practical gating strategies for laboratory use.
+
+<img src="assets/GatingTreeBanner1.jpg" align="center" width="90%" />
+
+The GatingTree approach departs from traditional methods by not relying on dimensional reduction. Instead, it explores the multidimensional landscape of cytometry data to uncover group-specific features. This is achieved through innovative metrics such as enrichment scores and gating entropy, which help in identifying critical features within high-dimensional cytometric datasets.
+
+GatingTree navigates the analysis of high-dimensional flow cytometry data in a previously unexplored way – to investigate the landscape of marker multidimensional space using pathfinding analysis, without the use of any multidimensional or multivariate analysis such as Principal Component Analysis and UMAP.
+
+<img src="assets/GatingTreeBanner2.jpg" align="center" width="90%" />
+
+## 2. Installation
+
+Install `devtools` if not already installed.
+
+```{r, eval=FALSE}
+library(devtools)
+devtools::install_github("MonoTockyLab/GatingTree", dependencies = TRUE)
+```
+
+## 3. Workflow
+
+The **GatingTree** package encompasses a variety of analysis workflows, each tailored to different aspects of single-cell temporal dynamics.
+
+**[Basic Workflow](vignettes/GatingTree_Workflow.html)**: This vignette provides users with a step-by-step guide to processing raw data, from initial quality checks to the preparation for advanced analyses.
+

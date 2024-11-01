@@ -1,0 +1,83 @@
+---
+title: "GatingTree: Initialization Using CSV File Inputs"
+author: "Dr. Masahiro Ono"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+link-citations: TRUE
+vignette: >
+  %\VignetteIndexEntry{GatingTree: Initialization Using CSV File Inputs}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+```{r, out.width = "40%", echo = FALSE}
+knitr::include_graphics('assets/GatingTree_logo.jpg')
+```
+
+## Step 1: Preparing Sample Data as CSV Files
+
+GatingTree can import expression data from flow cytometric samples in CSV format. This method is versatile and compatible with various flow cytometric analysis software packages. Here is step-by-step guidance for sample data preparation.
+
+1. Perform QC and clean flow cytometric data:
+   - Remove any irregular data.
+   - Identify target cells for analysis (e.g., lymphocytes identified by FSC/SSC and dead cell staining).
+
+2. Export each sample's data as a CSV file.
+3. Place all sample files in a single directory.
+
+Note that GatingTree performs all analyses using the entire set of sample data as a single batch.
+
+### 1-1. Create Flow Object
+
+Set your working directory to the folder that contains all the sample CSV files.
+
+If you are using the Terminal, activate `R` and execute `CreateFlowObject`.
+
+```{r, eval = FALSE}
+x <- CreateFlowObject()
+```
+
+By default, `CreateFlowObject` has the options `path = '.', select = TRUE`. This means that `CreateFlowObject` imports files from the current working directory, and a graphic device is automatically activated to enable user file selection.
+
+If you have a character vector of all files to be imported, you can use the options `select = TRUE, sample_file = filenames`. For example, to import all files with the extension 'csv':
+
+```{r, eval = FALSE}
+filenames <- list.files(pattern = "*.csv$")
+x <- CreateFlowObject(select = TRUE, sample_file = filenames)
+```
+
+### 1-2. Defining Sample Grouping
+
+The execution of the `CreateFlowObject` function generates a new folder named *sampledef*, which includes a new CSV file named *sample.csv*. This file is used for defining sample grouping.
+
+**Editing sample.csv:**
+- **First Column:** Contains automatically generated file names.
+- **Second Column ('group'):** Assign samples to experimental groups here.
+
+**Important Note:** Ensure the last row of *sample.csv* ends with a newline character to avoid read errors in R. If R struggles to read the file, open it in a text editor and add a newline at the end of the last row.
+
+**Example of Edited sample.csv:**
+
+```{r, eval = TRUE, echo = FALSE}
+df <- data.frame(file = paste('sample', 1:6, '.csv', sep=''), group = rep(c("control lymph node", "treated lymph node"), each = 3))
+knitr::kable(df, "simple")
+```
+
+**Importing Sample Grouping**
+
+Once edited, import the grouping data back into R using the `SampleDef` function. The imported data is stored in the `@sampledef` slot of your `FlowObject` as a new `SampleDef` object. This object is crucial for facilitating any between-group comparisons in your downstream analysis.
+
+```{r, eval = FALSE}
+# Define sample grouping
+x <- SampleDef(x)
+```
+
+You can confirm the sample definitions using `showSampleDef`.
+
+```{r, eval = FALSE}
+# Show sample grouping
+showSampleDef(x)
+```
+
+This will display the data frame that is retained in the FlowObject.

@@ -1,0 +1,10 @@
+url: https://MonoTockyLab.github.io/GatingTree
+
+template:
+  bootstrap: 5
+
+navbar:
+  title: GatingTree
+  structure:
+    left: [home, reference, articles]
+    right: [github, search]

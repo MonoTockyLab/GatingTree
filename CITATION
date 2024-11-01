@@ -1,0 +1,14 @@
+citHeader("To cite package ‘GatingTree’ in publications, please use:")
+
+bibentry(
+  "Article",
+  title = "GatingTree: Pathfinding Analysis of Group-Specific Effects in Cytometry Data",
+  author = person("Masahiro", "Ono", role = "aut"),
+  year = "2024",
+  journal = "arXiv",
+  volume = "arXiv:XXXX.XXXXX [stat.ME]",
+  url = "https://arxiv.org/abs/XXXX.XXXXX",
+  textVersion = "Masahiro Ono (2024). GatingTree: Pathfinding Analysis of Group-Specific Effects in Cytometry Data. arXiv:XXXX.XXXXX [stat.ME]. Available at: https://arxiv.org/abs/XXXX.XXXXX"
+)
+
+citFooter("Please see the package documentation for further information.")

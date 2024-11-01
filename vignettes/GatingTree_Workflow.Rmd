@@ -1,0 +1,184 @@
+---
+title: "GatingTree: Analyzing Cytometry Data with GatingTree"
+author: "Dr Masahiro Ono"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+link-citations: TRUE
+vignette: >
+  %\VignetteIndexEntry{GatingTree: Analyzing Cytometry Data with GatingTree}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+
+---
+
+```{r, out.width = "40%", echo = FALSE}
+knitr::include_graphics('assets/GatingTree_logo.jpg')
+```
+
+# Getting Started with GatingTree
+
+This vignette demonstrates how to analyze cytometry data using the **GatingTree** package. We will walk through the entire workflow, including data loading, preprocessing, creating a `FlowObject`, data transformation, defining positive/negative thresholds interactively, performing gating tree analysis, and visualizing the results.
+
+
+## Example 1: GatingTree Analysis of Cytometry Data Using R objects as Input Data
+
+### 1. Loading Libraries and Data
+First, load the necessary libraries and download the test data using `HDCytoData`.
+
+```{r setup, message=FALSE, warning=FALSE}
+library(GatingTree)
+library(HDCytoData)
+library(flowCore)
+d_SE <- Weber_AML_sim_main_5pc_SE()
+```
+
+This command downloads a hybrid mass cytometry dataset constructed by spiking a small percentage of Acute Myeloid Leukemia (AML) cells into healthy bone marrow cells (Weber et al., 2019).
+
+### 2. Preprocessing Data
+
+We convert the raw cytometry data into a format suitable for GatingTree analysis by mapping the experiment metadata and filtering relevant markers.
+
+
+```{r data-preparation}
+# Extract experiment information and channel names
+experiment_info <- d_SE@metadata$experiment_info
+channel_name <- colnames(d_SE)
+
+# Prepare sample definitions
+sampledef <- experiment_info[, c("sample_id", "group_id")]
+colnames(sampledef) <- c('file','group')
+```
+
+```{r data-preparation2}
+# Filter markers based on specific criteria
+marker_info <- as.data.frame(d_SE@colData)
+logic <- marker_info$marker_class == 'type' | marker_info$marker_name == 'DNA1'
+marker_info <- as.data.frame(marker_info[logic,])
+```
+
+```{r data-preparation3}
+# Extract expression data and adjust column names
+exprs <- assay(d_SE)
+annotationdf <- as.data.frame(rowData(d_SE))
+logic <- colnames(exprs) %in% marker_info$channel_name
+data <- exprs[, logic]
+colnames(data) <- marker_info$marker_name
+colnames(data) <- gsub("-", "", colnames(data))
+data <- cbind(data, data.frame(file = annotationdf$sample_id))
+data <- as.data.frame(data)
+```
+
+```{r data-preparation4}
+# Define variables excluding 'DNA1' and 'file'
+cnlogic <- colnames(data) %in% c("DNA1", "file")
+variables <- colnames(data)[!cnlogic]
+# Remove unnecessary samples
+logic <- grepl(pattern = 'CBF', data$file)
+Data <- data[!logic,]
+# Define sample definitions (grouping) by sampledef
+sampledef <- sampledef[!grepl(pattern = 'CBF', sampledef$group),]
+```
+
+### 2. Creating a FlowObject and Applying Data Transformation
+
+Create a `FlowObject` using the prepared data and sample definitions.
+
+```{r create-flowobject}
+# Create FlowObject
+x <- CreateFlowObject(Data = Data, sampledef = sampledef, experiment_name = 'AML_sim')
+```
+
+We can display the sample grouping using the `showSampleDef` function:
+
+```{r showsampledef}
+showSampleDef(x)
+```
+
+Next, apply data transformation. A moderated log transformation using the `LogData` function is recommended to normalize the data:
+
+```{r log-transformation}
+x <- LogData(x, variables = variables)
+```
+
+
+### 4. Determining Positive/Negative Threshold for Markers
+
+Use `DefineNegatives` to define the negative/positive threshold for each of your variables, activating interactive sessions.
+
+
+```{r definenegatives, eval = FALSE}
+
+x <- DefineNegatives(x)
+```
+
+Alternatively, you can import predefined thresholds using `import_negative_gate_def`:
+
+```{r csv-import}
+file_path <- system.file("extdata", "negative_gate_def_AML.csv", package = "GatingTree")
+negative_gate_def <- read.csv(file_path)
+x <- import_negative_gate_def(x, negative_gate_def)
+```
+
+After defining the negative thresholds, inspect the results by visualizing them using `PlotDefineNegatives`.
+
+To produce density plots (histograms):
+
+```{r plot-define-negatives, fig.width=6, fig.height=2}
+x <- PlotDefineNegatives(x, y_axis_var = 'Density', panel = 4)
+```
+
+Vertical line (red line) indicates the threshold value. 
+
+For 2d plots, choose a variable for y-axis:
+```{r plot-define-negatives2, fig.width=6, fig.height=2}
+x <- PlotDefineNegatives(x, y_axis_var = "CD3.logdata", panel = 4)
+```
+
+
+### 5. Perform GatingTree Analysis and Visualization
+
+With the data prepared and thresholds defined, perform the GatingTree analysis. Use the `createGatingTreeObject` function to conduct pathfinding analysis in multidimensional marker space and construct a GatingTree.
+
+```{r gating-tree-analysis, include=TRUE}
+x <- createGatingTreeObject(x, maxDepth = 5, min_cell_num=0, expr_group = 'CN', ctrl_group = 'healthy', verbose = FALSE)
+```
+
+Visualize the GatingTree output:
+
+```{r visualize-gating-tree, include=TRUE}
+x <- GatingTreeToDF(x)
+node <- x@Gating$GatingTreeObject
+datatree <- convertToDataTree(node)
+graph <- convert_to_diagrammer(datatree, size_factor=1, all_labels = F)
+
+library(DiagrammeR)
+render_graph(graph, width = 600, height = 600)
+```
+
+
+If necessary, prune the GatingTree to focus on the most informative nodes:
+
+```{r prune-and-visualize-tree, include=TRUE}
+x <- PruneGatingTree(x, max_entropy = 0.5, min_enrichment=0.5)
+```
+
+Visualize the pruned GatingTree:
+
+```{r visualise-pruned-tree, include = TRUE}
+pruned_node <- x@Gating$PrunedGatingTreeObject
+datatree2 <- convertToDataTree(pruned_node)
+graph <- convert_to_diagrammer(datatree2, size_factor=1)
+render_graph(graph, width = 600, height = 600)
+```
+
+### 6. Delta Enrichment Analysis
+
+Finally, assess the impact of adding each marker state to the enrichment score using the `PlotDeltaEnrichment` function.
+
+```{r delta-enrichment-analysis, include=TRUE, fig.width=6, fig.height=5}
+x <- PlotDeltaEnrichment(x, significance = F)
+```
+
+
+
+
