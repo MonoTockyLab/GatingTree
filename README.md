@@ -57,9 +57,16 @@ The **GatingTree** package includes vignettes to assist users in efficiently app
 *Note: You can access the vignettes within R using the `browseVignettes("GatingTree")` command after installing the package.*
 
 
-## 4. Package Manual
+## 4. Package Documentation
 
-In addition to the HTML manual pages, a PDF manual for the **GatingTree** package is available. You can find it in the installed package directory under `doc/`, or you can access it directly from [GitHub](https://github.com/MonoTockyLab/GatingTree/blob/master/inst/doc/GatingTree_Manual.pdf).
+The **GatingTree** package documentation is available online:
+
+- **Website**: [https://MonoTockyLab.github.io/GatingTree/](https://MonoTockyLab.github.io/GatingTree/)
+
+This site includes all the function reference manuals and vignettes (tutorials).
+
+
+In addition to the HTML manual pages, a PDF manual for the **GatingTree** package is available. You can find it in the installed package directory under `doc/`, or you can access it directly from [GitHub](https://github.com/MonoTockyLab/GatingTree/blob/master/inst/doc/GatingTree_0.1.0.pdf).
 
 <br>
 
@@ -86,7 +93,7 @@ Masahiro Ono (2024). *GatingTree: Pathfinding Analysis of Group-Specific Effects
 
 ## 6. License
 
-**GatingTree** is licensed under the Apache License 2.0. See the [LICENSE](LICENSE) file for more information.
+**GatingTree** is licensed under the Apache License 2.0. See the [LICENSE](https://github.com/MonoTockyLab/GatingTree/blob/main/LICENSE) file for more information.
 
 ## 7. The Ono Lab (MonoTockyLab)
 
