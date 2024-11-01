@@ -126,31 +126,3 @@ Tocky employs the Fluorescent Timer protein to analyze the temporal dynamics of 
 
 **Professional Homepage**: [Imperial College London - Masahiro Ono](https://www.imperial.ac.uk/people/m.ono)
 
----
-
-## Notes and Suggestions
-
-1. **Table of Contents**: A Table of Contents has been added after the main title for easy navigation.
-
-2. **Section Numbering**: The numbering has been corrected to ensure sequential order, with the "Contact and More" section now numbered as 8.
-
-3. **Alt Text for Images**: Alt text has been added to all images to improve accessibility.
-
-4. **Link Corrections**:
-   - Fixed the link in the Vignettes section from `UsingCSVfileInputs.gtml` to `UsingCSVfileInputs.html`.
-   - Ensured all other links point to the correct resources.
-
-5. **Email Inclusion**: Your email address has been included in the "Contact and More" section.
-
-6. **Grammatical Corrections**: Minor grammatical errors and typos have been corrected throughout the document.
-
-7. **Accessing Vignettes**: Added a note on how to access vignettes within R.
-
-   ```markdown
-   *Note: You can access the vignettes within R using the `browseVignettes("GatingTree")` command after installing the package.*
-   ```
-
-8. **License Section**: Added a "License" section to inform users about the package's licensing.
-
-9. **Consistency in Formatting**: Ensured consistent formatting for section headings, code blocks, and emphasis throughout the document.
-
