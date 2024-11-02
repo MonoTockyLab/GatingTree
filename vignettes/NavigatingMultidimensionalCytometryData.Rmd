@@ -1,0 +1,44 @@
+---
+title: "GatingTree: Navigating Multidimensional CytometryData"
+author: "Dr. Masahiro Ono"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+link-citations: TRUE
+vignette: >
+  %\VignetteIndexEntry{GatingTree: Navigating Multidimensional CytometryData}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+<img src="assets/MonoLab.jpg" align="right" width="40%" />
+<img src="assets/GatingTree_logo.jpg" align="center" width="50%" />
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+**GatingTree** is an R package designed to enhance the analysis of group-specific effects in cytometry data.
+
+### Current Challenges
+- **Advancements in Technology**: Cytometry technologies have advanced to allow simultaneous analysis of numerous markers.
+- **Complex Data Analysis**: These advancements introduce challenges in analyzing biological effects, such as treatment effects, within high-dimensional data.
+- **Limitations of Traditional Methods**:
+  - Manual gating does not meet complex analytical demands.
+  - Dimensional reduction methods like UMAP, with or without clustering, are commonly used but struggle with:
+    - **Reproducibility**: Poor reproducibility across experiments.
+    - **Practical Application**: Identified cell clusters often do not translate into effective gating strategies in the lab.
+- **Reproducibility Crisis**: These issues contribute to a reproducibility crisis in biological and medical research.
+
+### Solutions GatingTree Offers
+- **Innovative Approach**: 
+  - **No Dimensional Reduction**: Does not rely on dimensional reduction techniques.
+  - **Pathfinding Analysis**: Explores the multidimensional marker space to pinpoint group-specific features.
+- **Avoidance of Standard Analyses**:
+  - Deliberately avoids traditional multidimensional analyses like PCA and UMAP.
+  - Does not use clustering algorithms.
+- **Practical Applications**: Provides straightforward solutions that are:
+  - Directly applicable in downstream processes.
+  - Ideal for tasks such as flow cytometric sorting of target populations.
+
+<img src="vignettes/assets/GatingTreeBanner2.jpg" alt="GatingTree Banner" align="center" width="90%">
