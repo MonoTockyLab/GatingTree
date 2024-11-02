@@ -13,6 +13,7 @@ vignette: >
 <img src="assets/MonoLab.jpg" align="right" width="40%" />
 <img src="assets/GatingTree_logo.jpg" align="center" width="50%" />
 
+<img src="assets/GatingTreeBanner1.jpg" alt="GatingTree Banner" align="center" width="90%">
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -41,4 +42,4 @@ knitr::opts_chunk$set(echo = TRUE)
   - Directly applicable in downstream processes.
   - Ideal for tasks such as flow cytometric sorting of target populations.
 
-<img src="vignettes/assets/GatingTreeBanner2.jpg" alt="GatingTree Banner" align="center" width="90%">
+<img src="assets/GatingTreeBanner2.jpg" alt="GatingTree Banner" align="center" width="90%">
