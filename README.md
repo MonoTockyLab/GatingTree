@@ -127,7 +127,7 @@ For additional guidance on citation practices and maintaining research integrity
 
 Dr. Ono is **the creator and developer of Tocky**. He innovated the transgenic and computational technologies that constitute Tocky.
 
-Since 2008, Dr. Ono has been captivated by the applications of computational and mathematical methods in immunology, particularly multidimensional analysis, transitioning from a molecular immunologist to an **Integrated Experimental and Computational Immunologist**. Tocky represents one of the fusion technologies that Dr. Ono has both created and developed.
+Since 2008, Dr. Ono has been captivated by the applications of computational and mathematical methods in immunology, particularly multidimensional analysis, transitioning from a molecular immunologist to an **Integrative Experimental and Computational Immunologist**. Tocky represents one of the fusion technologies that Dr. Ono has both created and developed.
 
 Tocky employs the Fluorescent Timer protein to analyze the temporal dynamics of cell activities and development *in vivo*. His lab integrates molecular biology, immunology, and computational analysis to develop novel research tools, thereby enhancing the understanding of immune cell biology.
 
