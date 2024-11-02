@@ -75,9 +75,13 @@ In addition to the HTML manual pages, a PDF manual for the **GatingTree** packag
 
 ## 5. Copyright, License, and Citation Guidelines
 
-### Copyright and License
+### Copyright
 
-All code within the **GatingTree** package is copyrighted by [Masahiro Ono](https://monotockylab.github.io/). The distribution and modification are governed by the Apache License 2.0, which ensures that all users have the freedom to use and change the software in a way that respects the original authorship. See the [LICENSE](LICENSE) file for more information.
+All code and original graphical content within the GatingTree package, including anime-like characters and logos, are copyrighted by [Masahiro Ono](https://monotockylab.github.io/). 
+
+### License
+
+The distribution and modification are governed by the Apache License 2.0, which ensures that all users have the freedom to use and change the software in a way that respects the original authorship. See the [LICENSE](LICENSE) file for more information.
 
 ### Citing GatingTree
 
