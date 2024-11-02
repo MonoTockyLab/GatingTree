@@ -2,6 +2,8 @@ url: https://MonoTockyLab.github.io/GatingTree
 
 template:
   bootstrap: 5
+  params:
+    google_analytics: "G-VJHT0Y5RYF"
 
 navbar:
   title: GatingTree
