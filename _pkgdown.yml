@@ -4,6 +4,7 @@ template:
   bootstrap: 5
   params:
     google_analytics: "G-VJHT0Y5RYF"
+    google_site_verification: Pj4WWF5m9cqCcPqkGG75BI1_593zXImuFRpI8TnAous
 
 navbar:
   title: GatingTree
