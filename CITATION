@@ -1,14 +1,17 @@
-citHeader("To cite package ‘GatingTree’ in publications, please use:")
+citHeader("To cite GatingTree in publications use:")
 
 bibentry(
-  "Article",
+  bibtype = "Manual",
   title = "GatingTree: Pathfinding Analysis of Group-Specific Effects in Cytometry Data",
-  author = person("Masahiro", "Ono", role = "aut"),
+  author = person("Masahiro", "Ono"),
   year = "2024",
-  journal = "arXiv",
-  volume = "arXiv:XXXX.XXXXX [stat.ME]",
-  url = "https://arxiv.org/abs/XXXX.XXXXX",
-  textVersion = "Masahiro Ono (2024). GatingTree: Pathfinding Analysis of Group-Specific Effects in Cytometry Data. arXiv:XXXX.XXXXX [stat.ME]. Available at: https://arxiv.org/abs/XXXX.XXXXX"
+  note = "arXiv preprint arXiv:2411.00129 [q-bio.QM]",
+  url = "https://arxiv.org/abs/2411.00129",
+  textVersion = paste(
+    "Masahiro Ono (2024). GatingTree: Pathfinding Analysis of Group-Specific",
+    "Effects in Cytometry Data. arXiv preprint arXiv:2411.00129 [q-bio.QM].",
+    "Available at: https://arxiv.org/abs/2411.00129"
+  )
 )
 
-citFooter("Please see the package documentation for further information.")
+citFooter("This citation is under CC BY 4.0. Please see the URL for the license details.")

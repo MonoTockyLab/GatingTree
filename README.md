@@ -87,18 +87,17 @@ The distribution and modification are governed by the Apache License 2.0, which 
 
 If you use **GatingTree** in your research, please cite:
 
-Masahiro Ono (2024). *GatingTree: Pathfinding Analysis of Group-Specific Effects in Cytometry Data*. arXiv preprint arXiv:YYYY.ZZZZZ [q-bio.QM]. Available at: [https://arxiv.org/abs/YYYY.ZZZZZ](https://arxiv.org/abs/YYYY.ZZZZZ).
+Masahiro Ono (2024). *GatingTree: Pathfinding Analysis of Group-Specific Effects in Cytometry Data.* arXiv:2411.00129 [q-bio.QM]. Available at:[https://arxiv.org/abs/2411.00129](https://arxiv.org/abs/2411.00129).
 
 #### BibTeX Entry
 
 ```bibtex
-@Article{Ono2024GatingTree,
-  title   = {GatingTree: Pathfinding Analysis of Group-Specific Effects in Cytometry Data},
-  author  = {Masahiro Ono},
-  year    = {2024},
-  journal = {arXiv preprint},
-  note    = {arXiv:YYYY.ZZZZZ [q-bio.QM]},
-  url     = {https://arxiv.org/abs/YYYY.ZZZZZ},
+@article{ono2024gatingtree,
+    title={GatingTree: Pathfinding Analysis of Group-Specific Effects in Cytometry Data},
+    author={Masahiro Ono},
+    year={2024},
+    journal={arXiv:2411.00129 [q-bio.QM]},
+    url={https://arxiv.org/abs/2411.00129},
 }
 ```
 
@@ -106,8 +105,8 @@ Masahiro Ono (2024). *GatingTree: Pathfinding Analysis of Group-Specific Effects
 
 Citing software you've used is crucial for acknowledging contributions and ensuring reproducibility, which are critical for scientific progress.
 
-- **Acknowledging Contributions**: Giving credit to the developers and researchers who have contributed to the tools you utilize respects and acknowledges their intellectual contributions.
-- **Ensuring Reproducibility**: Proper citations allow other researchers to access the same tools and versions, thus replicating and verifying your scientific results.
+- Giving credit to the developers and researchers who have contributed to the tools you utilize respects and acknowledges their intellectual contributions.
+- Proper citations allow other researchers to access the same tools and versions, thus replicating and verifying your scientific results.
 
 Citations are integral to the scientific ecosystem; they help trace the evolution of ideas and enable others to build upon existing research.
 
