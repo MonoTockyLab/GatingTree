@@ -6,8 +6,8 @@ Description: This package offers a comprehensive toolkit for analyzing high-dime
 Depends: R (>= 4.2.0)
 Imports: utils, stats, graphics, grDevices, methods, rlang, ggplot2, gridExtra, data.tree, dunn.test, DiagrammeR
 Suggests: knitr
-License: Apache-2.0
-URL: https://github.com/MonoTockyLab/GatingTree
+License: Apache License 2.0
+URL: https://github.com/MonoTockyLab/GatingTree, https://MonoTockyLab.github.io/GatingTree
 BugReports: https://github.com/MonoTockyLab/GatingTree/issues
 Encoding: UTF-8
 RoxygenNote: 7.3.2
