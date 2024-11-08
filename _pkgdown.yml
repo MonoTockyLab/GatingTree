@@ -9,5 +9,5 @@ template:
 navbar:
   title: GatingTree
   structure:
-    left: [home, reference, articles]
+    left: [home, reference, articles, news]
     right: [github, search]
