@@ -1,5 +1,9 @@
 url: https://MonoTockyLab.github.io/GatingTree
 
+authors:
+  Masahiro Ono:
+    href: https://monotockylab.github.io/
+    
 template:
   bootstrap: 5
   params:
