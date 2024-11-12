@@ -403,6 +403,7 @@ PruneGatingTree <- function(x, max_entropy =0.9, min_enrichment = 0.1, min_avera
     unique_maxima_df <- x@Gating$GatingTreeDF
     node <- x@Gating$GatingTreeObject
     sampledef <- x@sampledef$sampledef
+    
     logic <-(unique_maxima_df$entropy < max_entropy)&( unique_maxima_df$max_enrichment > min_enrichment)
     unique_maxima_df <- unique_maxima_df[logic,]
     
@@ -432,7 +433,7 @@ PruneGatingTree <- function(x, max_entropy =0.9, min_enrichment = 0.1, min_avera
             p_value_vec[k] = p_value = wilcox.test(data = total_cell_num, node_percentage~group)$p.value
             average_proportion[k] <- mean(total_cell_num$node_percentage)
         }
-
+        
         
     }
     
@@ -441,10 +442,11 @@ PruneGatingTree <- function(x, max_entropy =0.9, min_enrichment = 0.1, min_avera
     res_df[['p_adjust']] <- p.adjust(res_df$p_value, method = p_adjust_method)
     
     pruned_node <- add_prune(node, min_average_proportion = min_average_proportion, theta)
-    pruned_node <- prune_tree(pruned_node)
+    #   pruned_node <- prune_tree(pruned_node)
+    
     pruned_node <- find_and_update_nodes(pruned_node, res_df = res_df)
     pruned_node <- prune_tree(pruned_node)
-
+    
     tree_to_df <- function(node){
         enrichments <- collect_all_enrichment(node)
         entropies <- collect_all_entropy(node)
@@ -471,13 +473,14 @@ PruneGatingTree <- function(x, max_entropy =0.9, min_enrichment = 0.1, min_avera
         maxima_df <- do.call(rbind, lapply(maxima_results, function(x) {
             data.frame(max_enrichment = x$max_value,entropy = x$entropy,  combination = x$combination, markers_up_to_max = x$markers_up_to_max, stringsAsFactors = FALSE)
         }))
-         
+        
         return(maxima_df)
     }
-
+    
     
     df <- tree_to_df(pruned_node)
     res_df <- res_df[res_df$combination %in% df$combination,]
+    
     x@Gating$PrunedGatingTreeObject <- pruned_node
     x@Gating$PrunedGatingTreeDF <- res_df
     
