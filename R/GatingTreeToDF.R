@@ -441,9 +441,7 @@ PruneGatingTree <- function(x, max_entropy =0.9, min_enrichment = 0.1, min_avera
     res_df <- res_df[!is.na(res_df$p_value),]
     res_df[['p_adjust']] <- p.adjust(res_df$p_value, method = p_adjust_method)
     
-    pruned_node <- add_prune(node, min_average_proportion = min_average_proportion, theta)
-    #   pruned_node <- prune_tree(pruned_node)
-    
+    pruned_node <- add_prune(node, min_average_proportion = min_average_proportion, theta)    
     pruned_node <- find_and_update_nodes(pruned_node, res_df = res_df)
     pruned_node <- prune_tree(pruned_node)
     
