@@ -36,9 +36,7 @@ calculate_entropy <- function(probs) {
 #' between an experimental group and a control group. It adds a small constant to avoid
 #' division by zero.
 #'
-#' @param percentage A numeric vector of percentages for each sample.
-#' @param sampledef A data frame containing at least a column named 'group' which denotes
-#'   the group assignment of each sample in the `percentage` vector.
+#' @param percentage_data A character to specify the column name for the percentage data.
 #' @param expr_group The name of the experimental group as a single string which must
 #'   match exactly with one of the groups in `sampledef`.
 #' @param ctrl_group The name of the control group as a single string which must
@@ -50,7 +48,6 @@ calculate_entropy <- function(probs) {
 #' @examples
 #' \dontrun{
 #' percentage <- c(0.1, 0.2, 0.15, 0.05)
-#' sampledef <- data.frame(group = c("exp", "exp", "ctrl", "ctrl"))
 #' calculate_enrichment(df, "exp", "ctrl")
 #' }
 #' @keywords internal
@@ -191,7 +188,6 @@ generate_marker_names <- function(marker_states, markers) {
 #'
 #' @param currentNode A list representing the current node in the gating tree, including
 #'   markers used, current node indices, and gating history.
-#' @param available_markers A character vector of markers that are still available for gating.
 #' @param root_data A data frame containing the complete dataset for analysis.
 #' @param sampledef A data frame specifying sample definitions and group assignments.
 #' @param neg_gate A list containing thresholds for negative gating decisions.
@@ -199,6 +195,7 @@ generate_marker_names <- function(marker_states, markers) {
 #' @param ctrl_group The name of the control group within `sampledef`.
 #' @param total_cell_per_file A data frame mapping file names to total cell counts per file.
 #' @param usedmarkers A vector of markers that have already been used in previous steps of gating.
+#' @param min_cell_num The minimal number of cells allowed in nodes.
 #'
 #' @return A list structure describing the outcomes at the current node, including any child
 #'   nodes created, or indicators if the node processing leads to termination.
@@ -454,6 +451,8 @@ gating_entropy <- function(positive_percentage){
 #' @param ctrl_group Optional; a character to specify the control group. If NULL, this is determined interactively.
 #' @param maxDepth Integer; the maximum depth of the gating tree, controlling how many
 #'   levels of decision nodes can be created.
+#' @param min_cell_num The minimal number of cells allowed in nodes.
+#' @param verbose Logical indicating whether to print progress messages and outputs. Default is \code{TRUE}.
 #'
 #' @return Modifies the input object by adding a 'GatingTreeObject' that contains
 #'   the entire structure of gating decisions and nodes.
@@ -745,7 +744,6 @@ findNodeByPath <- function(rootNode, path) {
 #'
 #' @param currentNode The current node in the gating tree from which children will be generated.
 #' @param root_data A data frame containing the data set used for gating decisions.
-#' @param availableMarkers A vector of markers that have not yet been used for gating at the current node.
 #' @param sampledef A data frame specifying sample definitions and group assignments.
 #' @param neg_gate A list containing thresholds for negative gating decisions.
 #' @param expr_group The name of the experimental group within `sampledef`.
@@ -753,6 +751,8 @@ findNodeByPath <- function(rootNode, path) {
 #' @param total_cell_per_file A data frame mapping file names to total cell counts, used for normalization.
 #' @param maxDepth The maximum depth to which the tree can expand.
 #' @param usedmarkers A vector of markers already used in the gating path up to the current node.
+#' @param min_cell_num The minimal number of cells allowed in nodes.
+#' @param depth Integer, the depth of the node in the tree.
 #'
 #' @return The modified current node with potentially new child nodes added, reflecting the gating tree expansion.
 #'
@@ -768,9 +768,8 @@ findNodeByPath <- function(rootNode, path) {
 #' @examples
 #' \dontrun{
 #' # Assuming currentNode and other required objects are predefined:
-#' updatedNode <- recursiveAddChildNode(currentNode, root_data, 
-#' availableMarkers, sampledef, neg_gate, expr_group,
-#' ctrl_group, total_cell_per_file, maxDepth = 3, usedmarkers)
+#' updatedNode <- recursiveAddChildNode(currentNode, root_data, sampledef,
+#' neg_gate, expr_group, ctrl_group, total_cell_per_file, maxDepth = 3, usedmarkers)
 #' }
 #' @export
 #' @family GatingTree
@@ -809,6 +808,7 @@ recursiveAddChildNode <- function(currentNode, root_data, sampledef, neg_gate, e
 #' @param available_markers Markers available for further gating.
 #' @param current_entropy Current entropy score of the node.
 #' @param current_enrichment Current enrichment score of the node.
+#' @param average_proportion Average proportion of cells within the node.
 #' @param entropy_scores Entropy scores dataframe.
 #' @param enrichment_scores Enrichment scores dataframe.
 #' @param history List object containing the history of previous steps.
@@ -832,7 +832,8 @@ recursiveAddChildNode <- function(currentNode, root_data, sampledef, neg_gate, e
 #' depth = 1
 #' usedmarkers = c("CD4")
 #' path = "rootNode"
-#' createChildNode(marker, state, indices, markers, entropy, enrichment, scores, scores, history, TRUE, depth, usedmarkers, path)
+#' createChildNode(marker, state, indices, markers, entropy, enrichment,
+#' scores, scores, history, TRUE, depth, usedmarkers, path)
 #' }
 #'
 #' @export

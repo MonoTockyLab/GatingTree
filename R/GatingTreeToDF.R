@@ -172,8 +172,6 @@ GatingTreeToDF <- function(x){
 #' object with additional annotations based on the analysis.
 #'
 #' @param x FlowObject.
-#' @param value A character string specifying which type of values to analyze and plot.
-#'   Expected values are 'DeltaE' for delta enrichment or 'IE' for interaction effects.
 #' @param significance A logical flag indicating whether to highlight significant markers
 #'   based on the results of statistical tests.
 #' @return Returns the original object `x` for safety.
@@ -529,6 +527,7 @@ extractNodes <- function(x, pruned = FALSE) {
 #'   enrichment or average proportion values.
 #' @param average_proportion A logical flag indicating whether to use the average proportion
 #'   of nodes to adjust node sizes and color gradient based on enrichment values.
+#' @param all_labels Logical. If TRUE, all parameters are included in each node within the output graph.
 #' @return Returns a DiagrammeR graph object representing the gating tree with nodes colored
 #'   and sized according to specified metrics.
 #' @details The function recursively traverses the gating tree, starting from the root,

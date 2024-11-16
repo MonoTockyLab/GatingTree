@@ -154,7 +154,15 @@ validity = function(object){
 #' @keywords internal
 
 setMethod("initialize", "FlowObject",
-  function(.Object, Data, sampledef, QCdata, Transformation, prep, Gating, metadata, Clustering) {
+  function(.Object,
+           Data = data.frame(),
+           sampledef = new("SampleDef"),
+           QCdata = list(),
+           Transformation = list(),
+           prep = list(),
+           Gating = list(),
+           metadata = list(),
+           Clustering = list()) {
     .Object@Data <- Data
     .Object@sampledef <- sampledef
     .Object@metadata <- metadata
@@ -167,6 +175,7 @@ setMethod("initialize", "FlowObject",
     return(.Object)
   }
 )
+
 
 
 

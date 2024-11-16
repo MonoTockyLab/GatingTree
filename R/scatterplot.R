@@ -28,9 +28,10 @@
 #' \dontrun{
 #' PlotNodeScatterPlot(x, c("path", "to", "node"))
 #' }
-#' @importFrom ggplot2 ggplot geom_jitter geom_errorbar labs theme_bw theme element_text
+#' @importFrom ggplot2 ggplot geom_jitter geom_errorbar labs theme_bw theme element_text position_jitter geom_text ylim
 #' @importFrom stats wilcox.test
 #' @importFrom gridExtra grid.arrange
+#' @importFrom rlang sym
 #'
 #' @export
 
@@ -73,10 +74,10 @@ PlotNodeScatterPlot <- function(x, path){
     ylim_range <- c(0, NA)  # Adjust based on your data range
     
     gg <- ggplot() +
-    geom_jitter(data = df, aes(x = Group, y = Percentage, colour = Group),
+    geom_jitter(data = df, aes(x = !!sym('Group'), y = !!sym('Percentage'), colour = !!sym('Group')),
     position = position_jitter(width = 0.02)) +  # Corrected line
-    geom_errorbar(data = summary_df, aes(x = Group, ymin = Mean - SD, ymax = Mean + SD, group = Group), width = 0.15, color = "grey") +
-    geom_errorbar(data = summary_df, aes(x = Group, ymin = Mean, ymax = Mean, group = Group), width = 0.2, color = "grey") +
+    geom_errorbar(data = summary_df, aes(x = !!sym('Group'), ymin = !!sym('Mean') - !!sym('SD'), ymax = !!sym('Mean') + !!sym('SD'), group = !!sym('Group')), width = 0.15, color = "grey") +
+    geom_errorbar(data = summary_df, aes(x = !!sym('Group'), ymin = !!sym('Mean'), ymax = !!sym('Mean'), group = !!sym('Group')), width = 0.2, color = "grey") +
     labs(y = ylab, title = title) +
     ylim(ylim_range) +
     theme_bw() +

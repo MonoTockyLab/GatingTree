@@ -5,7 +5,7 @@ Authors@R: c(person("Masahiro", "Ono", email = "m.ono@imperial.ac.uk", role = c(
 Description: This package offers a comprehensive toolkit for analyzing high-dimensional cytometric data, including flow and mass cytometry. It uniquely employs the novel GatingTree method, which enables comprehensive identification of group-specific effects across experimental groups without relying on dimensional reduction or clustering, enhancing the reproducibility of analyses. The toolkit includes a range of helper functions for data import, transformation, and effective visualization of GatingTree outputs, providing all essential tools for robust data analysis.
 Depends: R (>= 4.2.0)
 Imports: utils, stats, graphics, grDevices, methods, rlang, ggplot2, gridExtra, data.tree, dunn.test, DiagrammeR
-Suggests: knitr
+Suggests: knitr, rmarkdown, KernSmooth, flowCore, HDCytoData
 License: Apache License 2.0
 URL: https://github.com/MonoTockyLab/GatingTree, https://MonoTockyLab.github.io/GatingTree
 BugReports: https://github.com/MonoTockyLab/GatingTree/issues
