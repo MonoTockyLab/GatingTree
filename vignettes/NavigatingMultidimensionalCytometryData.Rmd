@@ -10,14 +10,19 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-<img src="assets/MonoLab.jpg" align="right" width="40%" />
-<img src="assets/GatingTree_logo.jpg" align="center" width="50%" />
-
-<img src="assets/GatingTreeBanner1.jpg" alt="GatingTree Banner" align="center" width="90%">
-
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+
+```{r mono-lab-img, echo=FALSE, out.width='40%', fig.align='right'}
+knitr::include_graphics(file.path("assets", "MonoLab.jpg"))
+```
+
+
+```{r gatingtree-banner2-img, echo=FALSE, out.width='90%', fig.align='center'}
+knitr::include_graphics(file.path("assets", "GatingTreeBanner2.jpg"))
+```
+
 
 **GatingTree** is an R package designed to enhance the analysis of group-specific effects in cytometry data.
 
@@ -31,6 +36,11 @@ knitr::opts_chunk$set(echo = TRUE)
     - **Practical Application**: Identified cell clusters often do not translate into effective gating strategies in the lab.
 - **Reproducibility Crisis**: These issues contribute to a reproducibility crisis in biological and medical research.
 
+
+```{r gatingtree-banner-img, echo=FALSE, out.width='90%', fig.align='center'}
+knitr::include_graphics(file.path("assets", "GatingTreeBanner1.jpg"))
+```
+
 ### Solutions GatingTree Offers
 - **Innovative Approach**: 
   - **No Dimensional Reduction**: Does not rely on dimensional reduction techniques.
@@ -42,4 +52,7 @@ knitr::opts_chunk$set(echo = TRUE)
   - Directly applicable in downstream processes.
   - Ideal for tasks such as flow cytometric sorting of target populations.
 
-<img src="assets/GatingTreeBanner2.jpg" alt="GatingTree Banner" align="center" width="90%">
+
+```{r gatingtree-logo-img, echo=FALSE, out.width='50%', fig.align='center'}
+knitr::include_graphics(file.path("assets", "GatingTree_logo.jpg"))
+```

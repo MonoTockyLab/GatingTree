@@ -12,7 +12,7 @@ vignette: >
 ---
 
 ```{r, out.width = "40%", echo = FALSE}
-knitr::include_graphics('assets/GatingTree_logo.jpg')
+knitr::include_graphics(file.path('assets', 'GatingTree_logo.jpg'))
 ```
 
 # Getting Started with GatingTree
