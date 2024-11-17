@@ -13,7 +13,7 @@ and assesses cell population statistics to manage the flow cytometry data analys
 
     <a class="navbar-brand me-2" href="../index.html">GatingTree</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -94,12 +94,20 @@ containing the initial data and parameters for gating.</p></dd>
 levels of decision nodes can be created.</p></dd>
 
 
+<dt id="arg-min-cell-num">min_cell_num<a class="anchor" aria-label="anchor" href="#arg-min-cell-num"></a></dt>
+<dd><p>The minimal number of cells allowed in nodes.</p></dd>
+
+
 <dt id="arg-expr-group">expr_group<a class="anchor" aria-label="anchor" href="#arg-expr-group"></a></dt>
 <dd><p>Optional; a character to specify the experimental group. If NULL, this is determined interactively.</p></dd>
 
 
 <dt id="arg-ctrl-group">ctrl_group<a class="anchor" aria-label="anchor" href="#arg-ctrl-group"></a></dt>
 <dd><p>Optional; a character to specify the control group. If NULL, this is determined interactively.</p></dd>
+
+
+<dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
+<dd><p>Logical indicating whether to print progress messages and outputs. Default is <code>TRUE</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -127,6 +135,7 @@ process or to terminate the process.</p>
     <div class="dont-index"><p>Other GatingTree:
 <code><a href="GatingTreeToDF.html">GatingTreeToDF</a>()</code>,
 <code><a href="PlotDeltaEnrichment.html">PlotDeltaEnrichment</a>()</code>,
+<code><a href="PlotDeltaEnrichmentPrunedTree.html">PlotDeltaEnrichmentPrunedTree</a>()</code>,
 <code><a href="PruneGatingTree.html">PruneGatingTree</a>()</code>,
 <code><a href="addChildNode.html">addChildNode</a>()</code>,
 <code><a href="add_prune.html">add_prune</a>()</code>,
@@ -170,7 +179,7 @@ process or to terminate the process.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
     </footer></div>

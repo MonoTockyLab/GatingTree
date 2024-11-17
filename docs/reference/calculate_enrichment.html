@@ -11,7 +11,7 @@ division by zero."><meta name="google-site-verification" content="Pj4WWF5m9cqCcP
 
     <a class="navbar-brand me-2" href="../index.html">GatingTree</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -64,7 +64,11 @@ division by zero.</p>
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
 
 
-<dl><dt id="arg-expr-group">expr_group<a class="anchor" aria-label="anchor" href="#arg-expr-group"></a></dt>
+<dl><dt id="arg-percentage-data">percentage_data<a class="anchor" aria-label="anchor" href="#arg-percentage-data"></a></dt>
+<dd><p>A character to specify the column name for the percentage data.</p></dd>
+
+
+<dt id="arg-expr-group">expr_group<a class="anchor" aria-label="anchor" href="#arg-expr-group"></a></dt>
 <dd><p>The name of the experimental group as a single string which must
 match exactly with one of the groups in `sampledef`.</p></dd>
 
@@ -72,15 +76,6 @@ match exactly with one of the groups in `sampledef`.</p></dd>
 <dt id="arg-ctrl-group">ctrl_group<a class="anchor" aria-label="anchor" href="#arg-ctrl-group"></a></dt>
 <dd><p>The name of the control group as a single string which must
 match exactly with one of the groups in `sampledef`.</p></dd>
-
-
-<dt id="arg-percentage">percentage<a class="anchor" aria-label="anchor" href="#arg-percentage"></a></dt>
-<dd><p>A numeric vector of percentages for each sample.</p></dd>
-
-
-<dt id="arg-sampledef">sampledef<a class="anchor" aria-label="anchor" href="#arg-sampledef"></a></dt>
-<dd><p>A data frame containing at least a column named 'group' which denotes
-the group assignment of each sample in the `percentage` vector.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -93,6 +88,7 @@ the group assignment of each sample in the `percentage` vector.</p></dd>
     <div class="dont-index"><p>Other GatingTree:
 <code><a href="GatingTreeToDF.html">GatingTreeToDF</a>()</code>,
 <code><a href="PlotDeltaEnrichment.html">PlotDeltaEnrichment</a>()</code>,
+<code><a href="PlotDeltaEnrichmentPrunedTree.html">PlotDeltaEnrichmentPrunedTree</a>()</code>,
 <code><a href="PruneGatingTree.html">PruneGatingTree</a>()</code>,
 <code><a href="addChildNode.html">addChildNode</a>()</code>,
 <code><a href="add_prune.html">add_prune</a>()</code>,
@@ -123,7 +119,6 @@ the group assignment of each sample in the `percentage` vector.</p></dd>
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
 <span class="r-in"><span><span class="va">percentage</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fl">0.2</span>, <span class="fl">0.15</span>, <span class="fl">0.05</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">sampledef</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>group <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"exp"</span>, <span class="st">"exp"</span>, <span class="st">"ctrl"</span>, <span class="st">"ctrl"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">calculate_enrichment</span><span class="op">(</span><span class="va">df</span>, <span class="st">"exp"</span>, <span class="st">"ctrl"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 </code></pre></div>
@@ -137,7 +132,7 @@ the group assignment of each sample in the `percentage` vector.</p></dd>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
     </footer></div>
