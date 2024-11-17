@@ -141,7 +141,6 @@ LogData <- function(x, graphics = TRUE, variables = NULL, prompt = FALSE){
 #' @param var A character vector specifying the variables (markers) in the FlowObject
 #'   for which the moderation of extreme negative values should be performed. If NULL,
 #'   the user is prompted to select variables interactively.
-#' @param output The output directory name for output files
 #' @param plot Logical, whether to produce diagnotic plots.
 
 #'
@@ -233,7 +232,7 @@ NormAF <- function(x, var = NULL, plot = FALSE) {
             channel_name <- neg_gate_def$variable[i]
             neg_threshold <- neg_gate_def$negative.gate[i]
             texpression <- x@Data[[channel_name]]
-            out <- moderate_negative(texpression,neg_threshold, main = channel_name)
+            out <- moderate_negative(texpression,neg_threshold, main = channel_name, plot = plot)
             x@Data[[channel_name]] <- out
         }
         data <- x@Data[,x@QCdata$negative_gate_def$variable]
@@ -269,7 +268,7 @@ NormAF <- function(x, var = NULL, plot = FALSE) {
             channel_name <- neg_gate_def$variable[i]
             neg_threshold <- neg_gate_def$negative.gate[i]
             texpression <- x@Data[[channel_name]]
-            out <- moderate_negative(texpression,neg_threshold, main = channel_name)
+            out <- moderate_negative(texpression,neg_threshold, main = channel_name, plot = plot)
             x@Data[[channel_name]] <- out
         }
     }
@@ -626,6 +625,7 @@ PlotDefineNegatives <- function(x, y_axis_var = NULL, output = FALSE, outputFile
 #' To moderate extreme negative values in an expression vector
 #' @param expression A numeric vector
 #' @param neg A negative threshold value
+#' @param plot Logical for whether to produce plots
 #' @param main title of plot
 #' @return A moderated expression data
 #' @examples
@@ -635,12 +635,19 @@ PlotDefineNegatives <- function(x, y_axis_var = NULL, output = FALSE, outputFile
 #'
 #' @keywords internal
 
-moderate_negative <- function(expression, neg, main){
+moderate_negative <- function(expression, neg, main, plot = TRUE){
+    
     xlim = c(min(expression), max(expression))
-    plot(density(expression), xlim = xlim, col = 8, main = main)
-    abline(v = neg, col = 2)
     median_neg <- median(expression[expression < neg])
-    abline(v = median_neg, col = 3)
+    
+    if(plot){
+        plot(density(expression), xlim = xlim, col = 8, main = main)
+        abline(v = neg, col = 2)
+        abline(v = median_neg, col = 3)
+    }
+
+    
+    
     mean <- min(median_neg, neg)
     higher_neg_values <- expression[which(expression > median_neg & expression <= neg)]
     lower_neg_values <- expression[which(expression <= median_neg)]
@@ -654,8 +661,11 @@ moderate_negative <- function(expression, neg, main){
     
     expression[sorted_indices] <- sorted_replacement_values
     
-    par(new = T)
-    plot(density(expression), xlim = xlim, col = 4, lty = 2, ann = FALSE, xaxt = 'n', yaxt = 'n')
+    if(plot){
+        par(new = T)
+        plot(density(expression), xlim = xlim, col = 4, lty = 2, ann = FALSE, xaxt = 'n', yaxt = 'n')
+    }
+
     return(expression)
 }
 
