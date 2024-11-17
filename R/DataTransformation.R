@@ -218,7 +218,16 @@ NormAF <- function(x, var = NULL, output = 'QC', plot = FALSE) {
 
     }
     
-    neg_gate_def <- neg_gate_def[var,]
+    if(length(x@QCdata$rawData)==0){
+        x@QCdata$rawData <- x@Data[,var]
+    }else{
+        tmp_cn <- setdiff(var, colnames(x@QCdata$rawData))
+        x@QCdata$rawDat <- cbind(x@QCdata$rawDat, x@Data[, tmp_cn])
+        
+    }
+    
+    
+    neg_gate_def <- neg_gate_def[neg_gate_def$variable %in% var,]
 
     
     if(plot){
@@ -710,9 +719,10 @@ PlotNormAF <- function(x, graphics = FALSE, max_cells_displayed = 30000, output 
     variable2 <- select.list(choices, graphics = graphics, title = "The second variable to be plotted:", multiple = FALSE)
     
     variable_chosen <- c(variable1, variable2)
+    
     variable_logged <- paste(variable_chosen, '.logdata', sep= '')
 
-    rawdata <- as.matrix(x@rawData[,variable_chosen])
+    rawdata <- as.matrix(x@QCdata$rawData[,variable_logged])
     raw_logged <- logTransformData(rawdata, 0.005, 0)
     af_logged <- x@Data[,variable_logged]
     

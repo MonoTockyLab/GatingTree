@@ -398,6 +398,11 @@ find_and_update_nodes <- function(node, path = NULL, res_df) {
 
 
 PruneGatingTree <- function(x, max_entropy =0.9, min_enrichment = 0.1, min_average_proportion = 0.001, p_adjust_method = 'BY', theta = 0){
+    
+    if(length(x@Gating$GatingTreeDF)==0){
+        stop('Apply GatingTreeToDF before using this function. \n')
+    }
+    
     unique_maxima_df <- x@Gating$GatingTreeDF
     node <- x@Gating$GatingTreeObject
     sampledef <- x@sampledef$sampledef
