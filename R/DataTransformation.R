@@ -160,7 +160,7 @@ LogData <- function(x, graphics = TRUE, variables = NULL, prompt = FALSE){
 #' @family Data Transformation
 
 
-NormAF <- function(x, var = NULL, output = 'QC', plot = FALSE) {
+NormAF <- function(x, var = NULL, plot = FALSE) {
 
     if(!inherits(x, "FlowObject")){
         stop("Use a FlowObject for x.")
@@ -168,10 +168,6 @@ NormAF <- function(x, var = NULL, output = 'QC', plot = FALSE) {
 
     if (is.null(x@QCdata$negative_gate_def)) {
         stop("Perform DefineNegatives. \n")
-    }
-    
-    if(!file.exists(output)){
-        dir.create(output)
     }
     
     neg_gate_def <- x@QCdata$negative_gate_def
