@@ -176,7 +176,13 @@ render_graph(graph, width = 600, height = 600)
 Finally, assess the impact of adding each marker state to the enrichment score using the `PlotDeltaEnrichment` function.
 
 ```{r delta-enrichment-analysis, include=TRUE, fig.width=6, fig.height=5}
-x <- PlotDeltaEnrichment(x, significance = F)
+x <- PlotDeltaEnrichment(x)
+```
+
+`PlotDeltaEnrichmentPrunedTree` further clarifies the impact of important markers using Pruned Gating Tree.
+
+```{r PlotDeltaEnrichmentPrunedTree, include=TRUE, fig.width=6, fig.height=5}
+x <- PlotDeltaEnrichmentPrunedTree(x)
 ```
 
 

@@ -172,17 +172,13 @@ GatingTreeToDF <- function(x){
 #' object with additional annotations based on the analysis.
 #'
 #' @param x FlowObject.
-#' @param significance A logical flag indicating whether to highlight significant markers
-#'   based on the results of statistical tests.
-#' @return Returns the original object `x` for safety.
+#' @return Returns the object `x` with statistical values
 #' @details The function conducts Kruskal-Wallis tests to determine the significance of
 #'   differences across markers, followed by Dunn's test for post-hoc analysis with Bonferroni
-#'   correction if significant. It prepares and displays a boxplot of the specified metrics
-#'   (Delta Enrichment or Interaction Effects). The markers are ordered and displayed based on
-#'   their significance and mean values.
+#'   correction if significant.
 #' @examples
 #' \dontrun{
-#'   x <- PlotDeltaEnrichment(x, value = "DeltaE", significance = TRUE)
+#'   x <- PlotDeltaEnrichment(x)
 #' }
 #' @export
 #' @importFrom ggplot2 ggplot aes geom_boxplot labs theme_minimal theme
@@ -191,7 +187,7 @@ GatingTreeToDF <- function(x){
 #' @family GatingTree
 
 
-PlotDeltaEnrichment <- function(x, significance = TRUE){
+PlotDeltaEnrichment <- function(x){
     marker_deltas_df <- x@Gating$GatingTree$delta_df
     kruskal_test_delta <- kruskal.test(marker_deltas_df[['DeltaE_value']] ~ marker_deltas_df[['Marker']])
     
@@ -201,15 +197,191 @@ PlotDeltaEnrichment <- function(x, significance = TRUE){
     
     mean_delta_values <- aggregate(DeltaE_value ~ Marker, data = marker_deltas_df, FUN = mean)
     colnames(mean_delta_values) <- c("Marker", "MeanDeltaE_value")
-    significant_threshold <- 0.05  # Placeholder, adjust based on your Bonferroni correction
+
     p_vec <- posthoc_results_delta$P.adjusted
     names(p_vec) <- posthoc_results_delta$comparisons
+    markers <- names(p_vec)
+    markers <- strsplit(markers, " - ")
+    marker_counts <- table(unlist(markers))
+    summary_table <- data.frame(
+    Marker = names(marker_counts),
+    Count_of_Significant_Differences = as.integer(marker_counts)
+    )
+    summary_table <- summary_table[order(-summary_table$Count_of_Significant_Differences), ]
+    summary_table <- merge(summary_table, mean_delta_values, by = "Marker")
+    summary_table <- summary_table[order(-summary_table$MeanDeltaE_value), ]
     
-    if(significance){
-        markers <- names(p_vec) [p_vec < significant_threshold]
-    }else{
-        markers <- names(p_vec)
+    markers <- summary_table$Marker
+    markers <- gsub("(.logdata)|[,]", "", gsub("[.](pos)", "+", markers))
+    markers <- gsub("(.logdata)|[,]", "", gsub("[.](neg)", "-", markers))
+    summary_table$Marker <- markers
+    
+    markers <- marker_deltas_df[,1]
+    markers <- gsub("(.logdata)|[,]", "", gsub("[.](pos)", "+", markers))
+    markers <- gsub("(.logdata)|[,]", "", gsub("[.](neg)", "-", markers))
+    marker_deltas_df$Marker <- factor(markers, levels = summary_table$Marker[order(-summary_table$MeanDeltaE_value)])
+    
+    p <- ggplot(marker_deltas_df, aes(x = !!sym("Marker"), y = !!sym("DeltaE_value"), fill = !!sym("Marker"))) +
+    geom_boxplot()+
+    labs(title = "Delta(Enrichment) Values for Each Marker",
+    x = "Marker",
+    y = "Delta Value") +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+    plot(p)
+    x@Gating$GatingTree$DeltaPlot <- p
+    x@Gating$GatingTree$DeltaStats <- kruskal_test_delta
+    return(x)
+}
+
+#' Plot Delta Enrichment or Interaction Effects for Each Marker Using Pruned GatingTree
+#'
+#' @param x FlowObject after applying PruneGatingTree.
+#' @return Returns the object `x` with statistical values
+#' @details The function conducts Kruskal-Wallis tests to determine the significance of
+#'   differences across markers, followed by Dunn's test for post-hoc analysis with Bonferroni
+#'   correction if significant.
+#' @examples
+#' \dontrun{
+#'   x <- PlotDeltaEnrichmentPrunedTree(x)
+#' }
+#' @export
+#' @importFrom ggplot2 ggplot aes geom_boxplot labs theme_minimal theme
+#' @importFrom dunn.test dunn.test
+#' @importFrom rlang sym
+#' @family GatingTree
+
+PlotDeltaEnrichmentPrunedTree <- function(x){
+    if(length(x@Gating$PrunedGatingTreeObject)==0){
+        stop('Apply PruneGatingTree before using this function. \n')
+        
     }
+    node <- x@Gating$PrunedGatingTreeObject
+    
+    enrichments <- collect_all_enrichment(node)
+    entropies <- collect_all_entropy(node)
+    d_values <- sapply(enrichments, function(x) x[1], simplify = FALSE)
+    d_vector <- unlist(d_values)
+    d_vector <- d_vector[!duplicated(d_vector)]
+    
+    delta_E <- list()
+    for (i in 1:length(enrichments)) {
+        current_enrichments <- unlist(enrichments[i])
+        l = length(current_enrichments)
+        tmp = c()
+        for(j in 2:l){
+            tmp <- c(tmp, current_enrichments[j] - current_enrichments[j-1])
+            names(tmp)[j-1] <- names(current_enrichments[j])
+        }
+        
+        delta_E[[i]] <- tmp
+        names(delta_E)[i] <- paste(names(current_enrichments), collapse = '_')
+    }
+    
+    calculated_deltas <- list()
+    for (i in 1:length(enrichments)) {
+        current_enrichments <- enrichments[[i]]
+        l <- length(current_enrichments)
+        if(l <=1){
+            if(!is.na(current_enrichments)){
+                delta_E[[i]] <- current_enrichments
+            }else{
+                delta_E[[i]] <- 0
+            }
+            
+            names(delta_E)[i] <- paste(names(current_enrichments), collapse = '_')
+            next
+        }
+        tmp <- vector("numeric", l - 1)
+        names_tmp <- vector("character", l - 1)
+        
+        k <- 1
+        for (j in 2:l) {
+            marker_pair <- paste(names(current_enrichments)[1:j], collapse = "_")
+            
+            if (!marker_pair %in% names(calculated_deltas)) {
+                tmp[k] <- current_enrichments[j] - current_enrichments[j - 1]
+                names_tmp[k] <- names(current_enrichments)[j]
+                calculated_deltas[[marker_pair]] <- TRUE  # Mark this pair as calculated
+                k <- k + 1
+            }
+        }
+        
+        if (k > 1) {
+            tmp <- tmp[1:(k - 1)]  # trim the unused portion
+            names_tmp <- names_tmp[1:(k - 1)]
+            names(tmp) <- names_tmp
+            delta_E[[i]] <- tmp
+            names(delta_E)[i] <- paste(names(current_enrichments), collapse = '_')
+        }
+    }
+    
+    marker_deltas <- list()
+    for (i in 1:length(delta_E)) {
+        for (marker in names(delta_E[[i]])) {
+            if (!is.null(marker_deltas[[marker]])) {
+                marker_deltas[[marker]] <- c(marker_deltas[[marker]], delta_E[[i]][[marker]])
+            } else {
+                marker_deltas[[marker]] <- delta_E[[i]][[marker]]
+            }
+        }
+    }
+    
+    delta_df <- do.call(rbind, lapply(names(marker_deltas), function(marker) {
+        data.frame(marker = marker, delta = marker_deltas[[marker]])
+    }))
+    
+    rownames(delta_df) <- NULL
+    delta_df <- do.call(rbind, lapply(names(marker_deltas), function(marker) {
+        data.frame(marker = marker, delta = marker_deltas[[marker]])
+    }))
+    
+    rownames(delta_df) <- NULL
+    
+    process_enrichment <- function(enrichment, index, entropies) {
+        max_value <- max(enrichment)
+        max_position <- which.max(enrichment)
+        markers_up_to_max <- names(enrichment)[1:max_position]
+        markers_sorted <- sort(markers_up_to_max)
+        combination_name <- paste(markers_sorted, collapse = "_")
+        markers_up_to_max = paste(markers_up_to_max, collapse= '_')
+        
+        corresponding_entropy <- entropies[[index]][max_position]
+        
+        list(
+        max_value = max_value,
+        combination = combination_name,
+        markers_up_to_max = markers_up_to_max,
+        entropy = corresponding_entropy
+        )
+    }
+    
+    maxima_results <- mapply(process_enrichment, enrichments, seq_along(enrichments), MoreArgs = list(entropies = entropies), SIMPLIFY = FALSE)
+    maxima_df <- do.call(rbind, lapply(maxima_results, function(x) {
+        data.frame(max_enrichment = x$max_value,entropy = x$entropy,  combination = x$combination, markers_up_to_max = x$markers_up_to_max, stringsAsFactors = FALSE)
+    }))
+    
+    rownames(maxima_df) <- NULL
+    maxima_df <- maxima_df[!duplicated(maxima_df$combination),]
+    sl <- order(maxima_df$max_enrichment, decreasing = TRUE)
+    maxima_df <- maxima_df[sl,]
+    
+    marker_deltas_df <- do.call(rbind, lapply(names(marker_deltas), function(marker) {
+        data.frame(Marker = marker, DeltaE_value = marker_deltas[[marker]])
+    }))
+        
+    kruskal_test_delta <- kruskal.test(marker_deltas_df[['DeltaE_value']] ~ marker_deltas_df[['Marker']])
+    
+    
+    posthoc_results_delta <- dunn.test(marker_deltas_df$DeltaE_value, marker_deltas_df$Marker, method = "bonferroni", table = FALSE)
+
+    mean_delta_values <- aggregate(DeltaE_value ~ Marker, data = marker_deltas_df, FUN = mean)
+    colnames(mean_delta_values) <- c("Marker", "MeanDeltaE_value")
+    p_vec <- posthoc_results_delta$P.adjusted
+    names(p_vec) <- posthoc_results_delta$comparisons
+
+    markers <- names(p_vec)
+   
     
     markers <- strsplit(markers, " - ")
     marker_counts <- table(unlist(markers))
@@ -239,11 +411,17 @@ PlotDeltaEnrichment <- function(x, significance = TRUE){
     theme_minimal() +
     theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x labels for clarity
     plot(p)
-    x@Gating$GatingTree$DeltaPlot <- p
-    x@Gating$GatingTree$DeltaStats <- kruskal_test_delta
+    
+    
+    if(length(x@Gating$PrunedGatingTree)==0){
+        x@Gating$PrunedGatingTree <- list()
+    }
+    x@Gating$PrunedGatingTree$delta_df <- marker_deltas_df
+    x@Gating$PrunedGatingTree$DeltaPlot <- p
+    x@Gating$PrunedGatingTree$DeltaStats <- kruskal_test_delta
+    
     return(x)
 }
-
 
 #' Add Prune Markers to Nodes
 #'
@@ -342,9 +520,9 @@ find_and_update_nodes <- function(node, path = NULL, res_df) {
     if (is.null(path)) path <- c()
 
     if (!is.null(node$CurrentPath)) {
-        path <- node$CurrentPath  # Correcting path handling
+        path <- node$CurrentPath
     }
-    current_combination <- paste(path[-1], collapse="_")  # Excluding 'rootNode'
+    current_combination <- paste(path[-1], collapse="_")
     
     if (current_combination %in% res_df$combination) {
         node$prune <- FALSE
@@ -444,7 +622,7 @@ PruneGatingTree <- function(x, max_entropy =0.9, min_enrichment = 0.1, min_avera
     res_df <- res_df[!is.na(res_df$p_value),]
     res_df[['p_adjust']] <- p.adjust(res_df$p_value, method = p_adjust_method)
     
-    pruned_node <- add_prune(node, min_average_proportion = min_average_proportion, theta)    
+    pruned_node <- add_prune(node, min_average_proportion = min_average_proportion, theta)
     pruned_node <- find_and_update_nodes(pruned_node, res_df = res_df)
     pruned_node <- prune_tree(pruned_node)
     
@@ -583,13 +761,13 @@ convert_to_diagrammer <- function(root, size_factor = 1, average_proportion = FA
                 tmp <- node$CurrentEnrichment
                 tmp <- max(tmp, 0)
                 tmp <- pmin(tmp, 1)
-                color_value <- rgb(tmp, 0, 1-tmp, alpha = tmp)  # Red gradient
+                color_value <- rgb(tmp, 0, 1-tmp, alpha = tmp)
             }else{
                 node_size <-  size_factor*node$CurrentEnrichment
                 tmp <- node$CurrentEntropy
                 tmp <- max(tmp, 0)
                 tmp <- pmin(tmp, 1)
-                color_value <- rgb(1-tmp, 0, tmp, alpha = (1-tmp)/1.5)  # Red gradient
+                color_value <- rgb(1-tmp, 0, tmp, alpha = (1-tmp)/1.5)
             }
 
             graph <<- add_node(graph, label = label_text,
@@ -635,12 +813,10 @@ convert_to_diagrammer <- function(root, size_factor = 1, average_proportion = FA
 collect_all_enrichment <- function(tree) {
   enrichment_list <- list()
 
-  # Collect enrichment from the current node if it exists
   if (!is.null(tree$History) && !is.null(tree$History$enrichment)) {
     enrichment_list <- c(enrichment_list, list(tree$History$enrichment))
   }
 
-  # Recursively collect enrichment from child nodes
   if (length(tree$Children) > 0) {
     for (child_name in names(tree$Children)) {
       child_enrichments <- collect_all_enrichment(tree$Children[[child_name]])
@@ -661,7 +837,6 @@ collect_peak_nodes <- function(tree) {
     node_names_with_peak <- c(node_names_with_peak, tpath)
   }
 
-  # Recursively collect $CurrentNodeName from child nodes that have a $Peak
   if (length(tree$Children) > 0) {
     for (child_name in names(tree$Children)) {
       child_node_names <- collect_peak_nodes(tree$Children[[child_name]])
@@ -696,12 +871,10 @@ collect_peak_nodes <- function(tree) {
 collect_all_entropy <- function(tree) {
   entropy_list <- list()
 
-  # Collect entropy from the current node if it exists
   if (!is.null(tree$History) && !is.null(tree$History$entropy)) {
     entropy_list <- c(entropy_list, list(tree$History$entropy))
   }
 
-  # Recursively collect entropy from child nodes
   if (length(tree$Children) > 0) {
     for (child_name in names(tree$Children)) {
       child_entropys <- collect_all_entropy(tree$Children[[child_name]])
