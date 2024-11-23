@@ -585,7 +585,7 @@ PruneGatingTree <- function(x, max_entropy =0.9, min_enrichment = 0.1, min_avera
     node <- x@Gating$GatingTreeObject
     sampledef <- x@sampledef$sampledef
     
-    logic <-(unique_maxima_df$entropy < max_entropy)&( unique_maxima_df$max_enrichment > min_enrichment)
+    logic <-(unique_maxima_df$entropy <= max_entropy)&( unique_maxima_df$max_enrichment >= min_enrichment)
     unique_maxima_df <- unique_maxima_df[logic,]
     
     rootdata <-  node$RootData
@@ -658,6 +658,8 @@ PruneGatingTree <- function(x, max_entropy =0.9, min_enrichment = 0.1, min_avera
     
     
     df <- tree_to_df(pruned_node)
+
+    
     res_df <- res_df[res_df$combination %in% df$combination,]
     
     x@Gating$PrunedGatingTreeObject <- pruned_node

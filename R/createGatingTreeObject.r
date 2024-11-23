@@ -261,6 +261,7 @@ general_node_rule <- function(currentNode, root_data, sampledef, neg_gate, expr_
         
         
         for (marker in available_markers) {
+
             marker_response <- ifelse(is_positive[, marker], 'Positive', 'Negative')
             positive_indices[[marker]] <- all_indices[current_indices_logic][is_positive[, marker]]
             negative_indices[[marker]] <- all_indices[current_indices_logic][is_negative[, marker]]
@@ -274,6 +275,7 @@ general_node_rule <- function(currentNode, root_data, sampledef, neg_gate, expr_
             if ((nrow(positive_percentage) == 0)|(nrow(negative_percentage) == 0) | (nrow(positive_percentage) < nrow(sampledef)) |  (nrow(negative_percentage) < nrow(sampledef)) ) {
                 next
             }
+            
             positive_group_mean_percentages <- aggregate(gated_percentage ~ group, data = positive_percentage, FUN = mean)
             negative_group_mean_percentages <- aggregate(gated_percentage ~ group, data = negative_percentage, FUN = mean)
             positive_enrichment <- positive_enrichment_scores[marker] <- calculate_enrichment(positive_percentage, percentage_data = 'gated_percentage', expr_group = expr_group, ctrl_group = ctrl_group)
@@ -547,6 +549,7 @@ createGatingTreeObject <- function(x, select_markers = FALSE, graphics = FALSE, 
     names(positive_average_proportions) <- names(negative_average_proportions) <- names(positive_indices) <-names(negative_indices) <- names(negative_entropy_scores) <-names(positive_entropy_scores) <- names(positive_enrichment_scores) <-  names(negative_enrichment_scores) <- available_markers
     
     for (marker in available_markers) {
+        
         marker_response <- ifelse(is_positive[, marker], 'Positive', 'Negative')
         positive_indices[[marker]] <- all_indices[is_positive[, marker]]
         negative_indices[[marker]] <- all_indices[is_negative[, marker]]
@@ -559,21 +562,26 @@ createGatingTreeObject <- function(x, select_markers = FALSE, graphics = FALSE, 
         percentage_data$gated_percentage <- percentage_data$gated_cell_num / percentage_data$total
         positive_percentage <- percentage_data[percentage_data$marker_response =='Positive',]
         negative_percentage <- percentage_data[percentage_data$marker_response =='Negative',]
-        
-        if ((nrow(positive_percentage) == 0)|(nrow(negative_percentage) == 0) | (nrow(positive_percentage) < nrow(sampledef)) |  (nrow(negative_percentage) < nrow(sampledef)) ) {
+
+
+        if ((nrow(positive_percentage) == 0)|(nrow(negative_percentage) == 0)
+        | (nrow(positive_percentage) < nrow(sampledef)) |  (nrow(negative_percentage) < nrow(sampledef))
+        ) {
+
             next
         }
         
-        positive_enrichment_scores[marker] <- calculate_enrichment(positive_percentage, percentage_data = 'gated_percentage', expr_group = expr_group, ctrl_group = ctrl_group)
-        negative_enrichment_scores[marker] <- calculate_enrichment(negative_percentage, percentage_data = 'gated_percentage', expr_group = expr_group, ctrl_group = ctrl_group)
-        
         positive_group_mean_percentages <- aggregate(gated_percentage ~ group, data = positive_percentage, FUN = mean)
         negative_group_mean_percentages <- aggregate(gated_percentage ~ group, data = negative_percentage, FUN = mean)
-        
+
+        positive_enrichment_scores[marker] <- calculate_enrichment(positive_percentage, percentage_data = 'gated_percentage', expr_group = expr_group, ctrl_group = ctrl_group)
+        negative_enrichment_scores[marker] <- calculate_enrichment(negative_percentage, percentage_data = 'gated_percentage', expr_group = expr_group, ctrl_group = ctrl_group)
+
         positive_average_proportions[marker] <-  mean(positive_group_mean_percentages$gated_percentage)
         negative_average_proportions[marker] <- mean(negative_group_mean_percentages$gated_percentage)
-        negative_group_mean_percentages <- aggregate(gated_percentage ~ group, data = negative_percentage, FUN = mean)
+
         if (is.null(positive_group_mean_percentages) || nrow(positive_group_mean_percentages) == 0 || is.null(negative_group_mean_percentages) || nrow(negative_group_mean_percentages) == 0) {
+
             next
         }
         positive_entropy_scores[marker] <- gating_entropy(positive_percentage)
@@ -621,6 +629,7 @@ createGatingTreeObject <- function(x, select_markers = FALSE, graphics = FALSE, 
     ), class = "GatingTreeRootNode")
 
     for(marker in markers){
+
         positive_marker <- paste(marker, 'pos', sep='.')
         negative_marker <- paste(marker, 'neg', sep='.')
         positive_history <- list(
