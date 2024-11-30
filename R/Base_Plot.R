@@ -28,18 +28,16 @@
 #' @param gating Logical, if TRUE, applies gating based on the markers and states provided; defaults to TRUE.
 #' @param split_group Logical, if TRUE, splits the data by 'group' variable within the dataset for separate analysis and plotting; defaults to TRUE.
 #'
-#' @return Returns the same FlowObject with additional provenance data indicating the analysis steps performed.
+#' @return Returns the same FlowObject for safety.
 #'
 #' @examples
 #' \dontrun{
-#'   x <- PlotFlow2D(x)
+#'   plotFlow2D(x)
 #' }
 #'
 #' @export
-#' @family flow cytometry analysis
 
-
-PlotFlow2D <- function(x, graphics = FALSE, output = 'output', markers = NULL, states = NULL, gating = TRUE, split_group = TRUE, max_cells_displayed = 30000) {
+plotFlow2D <- function(x, graphics = FALSE, output = 'output', markers = NULL, states = NULL, gating = TRUE, split_group = TRUE, max_cells_displayed = 30000) {
     
     if(!inherits(x, "FlowObject")){
         stop("Use a FlowObject for x.")
@@ -54,6 +52,7 @@ PlotFlow2D <- function(x, graphics = FALSE, output = 'output', markers = NULL, s
     }
     
     neg_gate_def <- x@QCdata$negative_gate_def
+    rownames(neg_gate_def) <- x@QCdata$negative_gate_def$variable
     neg_gate_def <- as.data.frame(neg_gate_def)
     choices_logdata <- neg_gate_def$variable[neg_gate_def$negative.gate !=0]
     choices <- sub(choices_logdata, pattern = '.logdata', replacement = '')
@@ -92,6 +91,7 @@ PlotFlow2D <- function(x, graphics = FALSE, output = 'output', markers = NULL, s
         }
     }
     
+    
     if(gating){
         logic <- rep(TRUE, nrow(X))
         for(i in 1:length(states)){
@@ -104,7 +104,8 @@ PlotFlow2D <- function(x, graphics = FALSE, output = 'output', markers = NULL, s
         }
         X <- X[logic,]
     }
-    
+    show(summary(logic))
+    show(dim(X))
     
     variable1 <- select.list(choices, graphics = graphics, title = "The first variable to be plotted (x-axis):", multiple = FALSE)
     variable2 <- select.list(choices, graphics = graphics, title = "The second variable to be plotted (y-axis):", multiple = FALSE)
@@ -125,11 +126,12 @@ PlotFlow2D <- function(x, graphics = FALSE, output = 'output', markers = NULL, s
     
     if(split_group){
         X$group <- as.factor(X$group)
+        
         X_list <- split(X, f = X$group)
         
         for(i in 1:length(X_list)){
             tmpX <- X_list[[i]]
-
+            show(dim(tmpX))
             
             x_var <- tmpX[,variable1]
             y_var <- tmpX[,variable2]
@@ -244,12 +246,8 @@ PlotFlow2D <- function(x, graphics = FALSE, output = 'output', markers = NULL, s
         pos = c(2, 4, 2, 4), cex = 1, col = 'darkblue')
     }
 
-    call_string <-match.call()
-    timestamp <- Sys.time()
-    entry <- list(call_string=call_string, timestamp =timestamp)
-    x@Provenance <- c(x@Provenance, list(entry))
     
-    return(x)
+    return(invisible(x))
 }
 
 
