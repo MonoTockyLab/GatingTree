@@ -69,7 +69,7 @@ The **GatingTree** package documentation is available online:
 
 This site includes all the function reference manuals and vignettes (tutorials).
 
-In addition to the HTML manual pages, a PDF manual for the **GatingTree** package is available. You can find it in the installed package directory under `doc/`, or you can access it directly from [GitHub](https://github.com/MonoTockyLab/GatingTree/blob/main/inst/doc/GatingTree_0.1.0.pdf).
+In addition to the HTML manual pages, a PDF manual for the **GatingTree** package is available. You can find it in the installed package directory under `doc/`, or you can access it directly from [GitHub](https://github.com/MonoTockyLab/GatingTree/blob/main/inst/doc/GatingTree_0.2.0.pdf).
 
 <br>
 
