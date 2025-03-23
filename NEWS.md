@@ -1,21 +1,19 @@
-## Changes in version 0.1.0 (2024-11-08)
+# GatingTree NEWS
 
-- **Fixed**: Resolved a NAMESPACE issue that was affecting documentation visibility for certain functions.
-
-## Changes in version 0.1.0 (2024-11-12)
-
-- **PruneGatingTree Function**: Corrected an issue where the pruning logic did not properly adhere to initial pruning criteria and failed to consistently retain parent nodes when any of their child nodes met retention conditions. This fix ensures that the function now correctly applies specified thresholds and respects the hierarchical structure of the gating tree.
-
+## Changes in Version 0.2.0 (2025-03-23)
+- **New Features**:
+  - **GatingTreeRandomForest**: Added functionality to apply Random Forest analysis to GatingTree node data.
+  - **predictGatingTreeRandomForest**: New function to perform predictions using models built with GatingTreeRandomForest.
 
 ## Changes in Version 0.1.1 (2024-11-17)
+- **Enhancements**:
+  - Removed the `significant` option from **PlotDeltaEnrichment**.
+  - Introduced **PlotDeltaEnrichmentPrunedTree**, a new function designed to provide a more powerful assessment of the impacts of important markers in pruned gating trees.
 
-- **PlotDeltaEnrichment** and **PlotDeltaEnrichmentPrunedTree**: 
-- The option `significant` has been removed.
-- Instead, a new function `PlotDeltaEnrichmentPrunedTree` is now available, which is more powerful in assessing the impacts of important markers.
+## Changes in Version 0.1.0 (2024-11-12)
+- **Bug Fixes**:
+  - **PruneGatingTree Function**: Fixed an issue where the pruning logic did not properly adhere to the initial pruning criteria. The function now correctly retains parent nodes when any of their child nodes meet retention conditions, respecting the hierarchical structure of the gating tree.
 
-
-## Changes in Version 0.1.1 (2024-11-17)
-
-- **PlotDeltaEnrichment** and **PlotDeltaEnrichmentPrunedTree**: 
-- The option `significant` has been removed.
-- Instead, a new function `PlotDeltaEnrichmentPrunedTree` is now available, which is more powerful in assessing the impacts of important markers.
+## Changes in Version 0.1.0 (2024-11-08)
+- **Fixed**:
+  - Resolved a NAMESPACE issue that was affecting documentation visibility for certain functions.
