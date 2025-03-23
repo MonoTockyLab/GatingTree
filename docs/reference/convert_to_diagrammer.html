@@ -11,7 +11,7 @@ and optionally the average proportion of nodes in the gating tree."><meta name="
 
     <a class="navbar-brand me-2" href="../index.html">GatingTree</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -55,6 +55,7 @@ and optionally the average proportion of nodes in the gating tree.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">convert_to_diagrammer</span><span class="op">(</span></span>
 <span>  <span class="va">root</span>,</span>
 <span>  size_factor <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  fontsize <span class="op">=</span> <span class="fl">12</span>,</span>
 <span>  average_proportion <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  all_labels <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -72,6 +73,10 @@ and optionally the average proportion of nodes in the gating tree.</p>
 <dt id="arg-size-factor">size_factor<a class="anchor" aria-label="anchor" href="#arg-size-factor"></a></dt>
 <dd><p>A multiplier for node sizes in the graph, allowing customization based on
 enrichment or average proportion values.</p></dd>
+
+
+<dt id="arg-fontsize">fontsize<a class="anchor" aria-label="anchor" href="#arg-fontsize"></a></dt>
+<dd><p>The size of font to be used in the graph.</p></dd>
 
 
 <dt id="arg-average-proportion">average_proportion<a class="anchor" aria-label="anchor" href="#arg-average-proportion"></a></dt>
@@ -96,34 +101,9 @@ of nodes to adjust node sizes and color gradient based on enrichment values.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p>Other GatingTree:
-<code><a href="GatingTreeToDF.html">GatingTreeToDF</a>()</code>,
-<code><a href="PlotDeltaEnrichment.html">PlotDeltaEnrichment</a>()</code>,
-<code><a href="PlotDeltaEnrichmentPrunedTree.html">PlotDeltaEnrichmentPrunedTree</a>()</code>,
-<code><a href="PruneGatingTree.html">PruneGatingTree</a>()</code>,
-<code><a href="addChildNode.html">addChildNode</a>()</code>,
-<code><a href="add_prune.html">add_prune</a>()</code>,
-<code><a href="apply_gating_conditions.html">apply_gating_conditions</a>()</code>,
-<code><a href="baseline_entropy.html">baseline_entropy</a>()</code>,
-<code><a href="calculate_enrichment.html">calculate_enrichment</a>()</code>,
-<code><a href="calculate_entropy.html">calculate_entropy</a>()</code>,
-<code><a href="collect_all_enrichment.html">collect_all_enrichment</a>()</code>,
-<code><a href="collect_all_entropy.html">collect_all_entropy</a>()</code>,
-<code><a href="collect_history.html">collect_history</a>()</code>,
-<code><a href="collect_leaf_enrichment.html">collect_leaf_enrichment</a>()</code>,
-<code><a href="collect_markers.html">collect_markers</a>()</code>,
-<code><a href="convertToDataTree.html">convertToDataTree</a>()</code>,
-<code><a href="count_nodes.html">count_nodes</a>()</code>,
-<code><a href="createChildNode.html">createChildNode</a>()</code>,
-<code><a href="createGatingTreeObject.html">createGatingTreeObject</a>()</code>,
-<code><a href="findNodeByPath.html">findNodeByPath</a>()</code>,
-<code><a href="find_and_update_nodes.html">find_and_update_nodes</a>()</code>,
-<code><a href="gating_entropy.html">gating_entropy</a>()</code>,
-<code><a href="general_node_rule.html">general_node_rule</a>()</code>,
-<code><a href="generate_marker_names.html">generate_marker_names</a>()</code>,
-<code><a href="getNode.html">getNode</a>()</code>,
-<code><a href="prune_tree.html">prune_tree</a>()</code>,
-<code><a href="recursiveAddChildNode.html">recursiveAddChildNode</a>()</code></p></div>
+    <div class="dont-index"><p>Other GatingTree Visualization:
+<code><a href="convertGatingTreeToGraph.html">convertGatingTreeToGraph</a>()</code>,
+<code><a href="convertToDataTree.html">convertToDataTree</a>()</code></p></div>
     </div>
 
     <div class="section level2">

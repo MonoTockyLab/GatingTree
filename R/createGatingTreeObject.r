@@ -24,7 +24,7 @@
 #' entropy_result <- calculate_entropy(probs)
 #'}
 #' @family GatingTree
-
+#' @noRd
 calculate_entropy <- function(probs) {
     -sum(probs * log2(probs + 1e-10))
 }
@@ -52,7 +52,7 @@ calculate_entropy <- function(probs) {
 #' }
 #' @keywords internal
 #' @family GatingTree
-
+#' @noRd
 calculate_enrichment <- function(df, percentage_data = 'node_percentage', expr_group = NULL, ctrl_group = NULL) {
     percentage <- df[,percentage_data]
     group1_logic <- df[['group']]==expr_group
@@ -77,7 +77,7 @@ calculate_enrichment <- function(df, percentage_data = 'node_percentage', expr_g
 #' baseline_entropy(sampledef)
 #'}
 #' @family GatingTree
-
+#' @noRd
 baseline_entropy <- function(data) {
     freqs <- table(data[['group']])
     probs <- freqs / sum(freqs)
@@ -102,7 +102,7 @@ baseline_entropy <- function(data) {
 #'     gating_results <- apply_gating_conditions(marker_data, combinations_matrix, thresholds)
 #'}
 #' @family GatingTree
-
+#' @noRd
 apply_gating_conditions <- function(data, combinations_matrix, thresholds) {
     if (is.data.frame(data)) {
         data <- as.matrix(data)
@@ -162,6 +162,7 @@ apply_gating_conditions <- function(data, combinations_matrix, thresholds) {
 #' }
 #' @keywords internal
 #' @family GatingTree
+#' @noRd
 generate_marker_names <- function(marker_states, markers) {
     state_labels <- c(".neg", ".pos")  # Labels for states
     names <- character(length(markers))
@@ -209,7 +210,10 @@ generate_marker_names <- function(marker_states, markers) {
 #' expr_group, ctrl_group, total_cell_per_file, usedmarkers)
 #'}
 #'
+#' @importFrom dplyr count full_join mutate coalesce
+#' @importFrom rlang sym
 #' @family GatingTree
+#' @noRd
 general_node_rule <- function(currentNode, root_data, sampledef, neg_gate, expr_group, ctrl_group, total_cell_per_file, usedmarkers, min_cell_num = 25) {
     
     if(currentNode$Leaf){
@@ -234,10 +238,17 @@ general_node_rule <- function(currentNode, root_data, sampledef, neg_gate, expr_
     is_positive <- sweep(node_data[,node_marker_names], 2, aligned_thresholds, ">")
     is_negative <- !is_positive
     
-    total_cell_num <- table(node_data$file)
-    total_cell_num <- data.frame(file = names(total_cell_num), node_total = as.vector(total_cell_num))
-    total_cell_num <- merge(total_cell_num, data.frame( total_cell_per_file), by = 'file')
-    total_cell_num$node_percentage <- total_cell_num$node_total/total_cell_num$total
+   # total_cell_num <- table(node_data$file)
+   # total_cell_num <- data.frame(file = names(total_cell_num), node_total = as.vector(total_cell_num))
+   # total_cell_num <- merge(total_cell_num, data.frame( total_cell_per_file), by = 'file')
+   # total_cell_num$node_percentage <- total_cell_num$node_total/total_cell_num$total
+   total_cell_num <- node_data %>%
+     count(file, name = "node_total") %>%
+     full_join(data.frame(total_cell_per_file), by = "file") %>%
+     full_join(sampledef, by = "file") %>%
+     mutate(node_total = coalesce(!!sym("node_total"), 0),  # Replace NA values with 0
+            node_percentage = !!sym("node_total") / !!sym("total"))
+            
     min_node_total <- min(total_cell_num$node_total)
     
     if(min_node_total < min_cell_num){
@@ -272,7 +283,7 @@ general_node_rule <- function(currentNode, root_data, sampledef, neg_gate, expr_
             positive_percentage <- percentage_data[percentage_data$marker_response =='Positive',]
             negative_percentage <- percentage_data[percentage_data$marker_response =='Negative',]
             
-            if ((nrow(positive_percentage) == 0)|(nrow(negative_percentage) == 0) | (nrow(positive_percentage) < nrow(sampledef)) |  (nrow(negative_percentage) < nrow(sampledef)) ) {
+            if ((nrow(positive_percentage) == 0)|(nrow(negative_percentage) == 0)){ #| #(nrow(positive_percentage) < nrow(sampledef)) |  (nrow(negative_percentage) < nrow(sampledef)) ) {
                 next
             }
             
@@ -421,6 +432,7 @@ general_node_rule <- function(currentNode, root_data, sampledef, neg_gate, expr_
 #' gating_entropy(data)
 #'}
 #' @family GatingTree
+#' @noRd
 
 gating_entropy <- function(positive_percentage){
     group_levels <- unique(positive_percentage$group)
@@ -482,7 +494,6 @@ gating_entropy <- function(positive_percentage){
 #' @export
 #' @family GatingTree
 
-
 createGatingTreeObject <- function(x, select_markers = FALSE, graphics = FALSE, markers = NULL, maxDepth = 3, min_cell_num = 25, expr_group = NULL, ctrl_group = NULL, verbose = TRUE) {
     if(!inherits(x, "FlowObject")){
         stop("Use a FlowObject.")
@@ -520,11 +531,20 @@ createGatingTreeObject <- function(x, select_markers = FALSE, graphics = FALSE, 
         if(select_markers){
             markers <- select.list(choices, graphics = graphics, title = "Data to be modelled", multiple =TRUE)
               choices <- markers
+        }else{#Unless select_markers = TRUE, neg_gate$variable is used
+            markers <- choices
+        }
+    }else{#If markers is specified and it is a character vector, then the existing variables specified by the option marker are used
+        if(is.character(markers)){
+            markers <- intersect(choices, markers)
         }else{
             markers <- choices
         }
-    }else{
-        markers <- choices
+        
+    }
+    if(verbose){
+        cat("The number of markers used: ", length(markers), "\n")
+        
     }
     available_markers <-  markers
     all_indices <- 1:nrow(X)
@@ -549,7 +569,7 @@ createGatingTreeObject <- function(x, select_markers = FALSE, graphics = FALSE, 
     names(positive_average_proportions) <- names(negative_average_proportions) <- names(positive_indices) <-names(negative_indices) <- names(negative_entropy_scores) <-names(positive_entropy_scores) <- names(positive_enrichment_scores) <-  names(negative_enrichment_scores) <- available_markers
     
     for (marker in available_markers) {
-        
+
         marker_response <- ifelse(is_positive[, marker], 'Positive', 'Negative')
         positive_indices[[marker]] <- all_indices[is_positive[, marker]]
         negative_indices[[marker]] <- all_indices[is_negative[, marker]]
@@ -565,9 +585,9 @@ createGatingTreeObject <- function(x, select_markers = FALSE, graphics = FALSE, 
 
 
         if ((nrow(positive_percentage) == 0)|(nrow(negative_percentage) == 0)
-        | (nrow(positive_percentage) < nrow(sampledef)) |  (nrow(negative_percentage) < nrow(sampledef))
+       # | (nrow(positive_percentage) < nrow(sampledef)) |  (nrow(negative_percentage) < nrow(sampledef))
         ) {
-
+            
             next
         }
         
@@ -671,7 +691,6 @@ createGatingTreeObject <- function(x, select_markers = FALSE, graphics = FALSE, 
         parentNode$Children[[childNode$CurrentNodeName]] <- childNode
     }
     
-    # Example initial call
     firstLevelNames <- names(rootNode$Children)
     
     if(verbose){
@@ -780,10 +799,9 @@ findNodeByPath <- function(rootNode, path) {
 #' updatedNode <- recursiveAddChildNode(currentNode, root_data, sampledef,
 #' neg_gate, expr_group, ctrl_group, total_cell_per_file, maxDepth = 3, usedmarkers)
 #' }
-#' @export
+#' @keywords internal
 #' @family GatingTree
-
-
+#' @noRd
 recursiveAddChildNode <- function(currentNode, root_data, sampledef, neg_gate, expr_group, ctrl_group, total_cell_per_file, maxDepth = 3, usedmarkers, min_cell_num=25, depth = 1) {
 
     if (currentNode$Leaf |currentNode$Depth >= maxDepth) {
@@ -845,9 +863,9 @@ recursiveAddChildNode <- function(currentNode, root_data, sampledef, neg_gate, e
 #' scores, scores, history, TRUE, depth, usedmarkers, path)
 #' }
 #'
-#' @export
+#' @keywords internal
 #' @family GatingTree
-
+#' @noRd
 
 createChildNode <- function(marker, current_marker_state, indices, available_markers, current_entropy, current_enrichment, average_proportion,entropy_scores, enrichment_scores, history, isPositive = TRUE, depth, usedmarkers, path) {
     # Determine the suffix based on marker state
@@ -893,9 +911,9 @@ createChildNode <- function(marker, current_marker_state, indices, available_mar
 #' addChildNode(rootNode, childNode, path)
 #' }
 #'
-#' @export
+#' @keywords internal
 #' @family GatingTree
-
+#' @noRd
 
 addChildNode <- function(rootNode, childNode, path) {
     if (length(path) == 1) {
@@ -933,7 +951,6 @@ addChildNode <- function(rootNode, childNode, path) {
 #' @export
 #' @family GatingTree
 
-
 getNode <- function(gatingTreeObject, path) {
     currentNode <- gatingTreeObject
     for (i in 1:length(path)) {
@@ -966,7 +983,7 @@ getNode <- function(gatingTreeObject, path) {
 #'
 #' @export
 #' @importFrom data.tree Node
-#' @family GatingTree
+#' @family GatingTree Visualization
 
 convertToDataTree <- function(node, pathName = "rootNode") {
     dataTreeNode <- Node$new(pathName)
@@ -995,13 +1012,13 @@ convertToDataTree <- function(node, pathName = "rootNode") {
 #' @param tree The gating tree structure.
 #'
 #' @return A vector of unique markers used in the tree.
-#' @export
+#' @keywords internal
 #' @examples
 #' \dontrun{
 #' collect_markers(tree)
 #'}
 #' @family GatingTree
-
+#' @noRd
 collect_markers <- function(tree) {
     markers <- vector("character")
     if (!is.null(tree$Marker)) {
@@ -1032,10 +1049,9 @@ collect_markers <- function(tree) {
 #' historyData <- collect_history(tree)
 #' }
 #'
-#' @export
+#' @keywords internal
 #' @family GatingTree
-
-
+#' @noRd
 collect_history <- function(tree) {
     history <- list()
     
@@ -1071,9 +1087,9 @@ collect_history <- function(tree) {
 #' leafEnrichments <- collect_leaf_enrichment(tree)
 #' }
 #'
-#' @export
+#' @keywords internal
 #' @family GatingTree
-
+#' @noRd
 
 collect_leaf_enrichment <- function(tree) {
     enrichment_list <- list()
@@ -1109,7 +1125,7 @@ collect_leaf_enrichment <- function(tree) {
 #' count_nodes(tree)
 #'}
 #' @family GatingTree
-
+#' @noRd
 count_nodes <- function(tree) {
     count <- 1
     if (!is.null(tree$Left)) {

@@ -1,12 +1,13 @@
 Package: GatingTree
-Version: 0.1.1
+Version: 0.2.0
+Date: 2025-03-23
 Title: Pathfinding Analysis of Group-Specific Effects in Cytometry Data
 Authors@R: c(person("Masahiro", "Ono", email = "m.ono@imperial.ac.uk", role = c("aut", "cre"), comment = c(ORCID="0000-0002-9284-7326")))
-Description: This package offers a comprehensive toolkit for analyzing high-dimensional cytometric data, including flow and mass cytometry. It uniquely employs the novel GatingTree method, which enables comprehensive identification of group-specific effects across experimental groups without relying on dimensional reduction or clustering, enhancing the reproducibility of analyses. The toolkit includes a range of helper functions for data import, transformation, and effective visualization of GatingTree outputs, providing all essential tools for robust data analysis.
+Description: Implements the Gating Tree methodology, a novel pathfinding approach for analyzing high-dimensional cytometry data, including flow and mass cytometry. This package circumvents traditional dimensional reduction and clustering by utilizing enrichment scores and gating entropy to effectively identify group-specific features. It encompasses functions for data transformation, visualization, and the application of advanced machine learning techniques, such as Random Forest, to enhance analysis. The methodology is crafted to produce outputs that are immediately usable as gating strategies for downstream experimental applications, demonstrating superior performance in both simulated and real cytometric datasets.
 Depends: R (>= 4.2.0)
-Imports: utils, stats, graphics, grDevices, methods, rlang, ggplot2, gridExtra, data.tree, dunn.test, DiagrammeR
+Imports: utils, stats, graphics, grDevices, methods, rlang, ggplot2, gridExtra, data.tree, dunn.test, DiagrammeR, randomForest, dplyr, gplots
 Suggests: knitr, rmarkdown, KernSmooth, flowCore, HDCytoData
-License: Apache License 2.0
+License: file LICENSE
 URL: https://github.com/MonoTockyLab/GatingTree, https://MonoTockyLab.github.io/GatingTree
 BugReports: https://github.com/MonoTockyLab/GatingTree/issues
 Encoding: UTF-8

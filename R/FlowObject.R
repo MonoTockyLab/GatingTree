@@ -115,6 +115,7 @@ showSampleDef <- function(x){
 #' @slot Gating A list containing gating information.
 #' @slot QCdata A list containing quality control information.
 #' @slot Transformation A list containing settings for data transformation, including the log data settings.
+#' @slot Model A list containing data models and machine learning models.
 #' @importFrom methods setClass setMethod
 #' @export
 
@@ -126,7 +127,8 @@ setClass("FlowObject", slots = list(
         Clustering = "list",
         Gating = "list",
         QCdata = "list",
-        Transformation = "list"
+        Transformation = "list",
+        Model = "list"
     ),
 validity = function(object){
            return(TRUE)
@@ -147,6 +149,7 @@ validity = function(object){
 #' @param Gating A list containing outputs of Gating.
 #' @param QCdata A list containing the quality control information for the flow cytometry data.
 #' @param Transformation A list containing settings for data transformation, including the log data settings.
+#' @param Model A list containing Data Models and Machine Learning Models
 #'
 #' @return A FlowObject
 #'
@@ -162,7 +165,8 @@ setMethod("initialize", "FlowObject",
            prep = list(),
            Gating = list(),
            metadata = list(),
-           Clustering = list()) {
+           Clustering = list(),
+           Model = list()) {
     .Object@Data <- Data
     .Object@sampledef <- sampledef
     .Object@metadata <- metadata
@@ -171,6 +175,7 @@ setMethod("initialize", "FlowObject",
     .Object@Gating <- Gating
     .Object@QCdata <- QCdata
     .Object@Transformation <- Transformation
+    .Object@Model <- Model
 
     return(.Object)
   }
@@ -217,6 +222,10 @@ show.FlowObject <- function(object) {
         cat("GatingTreeObject ")
     }
     
+    if(length(object@Model) > 0 && !is.null(names(object@Model))){
+        cat(paste("Model: ", names(object@Model)))
+    }
+    
     cat("\n")
 
   }
@@ -238,6 +247,7 @@ setMethod("show", "FlowObject", show.FlowObject)
 #' @param Gating A list containing outputs of gating, including GatingTree objects.
 #' @param QCdata A list containing the quality control information for the flow cytometry data.
 #' @param Transformation A list containing settings for data transformation, including the log data settings.
+#' @param Model A list containing Data Models and Machine Learning Models
 #' @return An object of class FlowObject, which encapsulates all provided data and settings for flow cytometry analysis.
 #' @export
 flowObject <- function(Data = data.frame(),
@@ -247,7 +257,8 @@ flowObject <- function(Data = data.frame(),
                         Clustering = list(),
                         Gating = list(),
                         QCdata = list(),
-                        Transformation = list()
+                        Transformation = list(),
+                        Model = list()
                 ){
   
 
@@ -281,6 +292,10 @@ flowObject <- function(Data = data.frame(),
     stop("Transformation must be a list")
   }
 
+  if(!is.list(Model)) {
+    stop("Model must be a list")
+  }
+
   out <- new("FlowObject",
               Data = Data,
               metadata = metadata,
@@ -289,7 +304,8 @@ flowObject <- function(Data = data.frame(),
               Gating = Gating,
               Clustering = Clustering,
               QCdata = QCdata,
-              Transformation = Transformation
+              Transformation = Transformation,
+              Model = Model
             )
   
   return(out)

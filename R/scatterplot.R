@@ -18,7 +18,7 @@
 #' statistical summaries including means and standard deviations by group,
 #' adds error bars to the plot, and marks significant differences with asterisks.
 #'
-#' @param x A TockyObject or FlowObject with GatingTreeObject
+#' @param x A FlowObject with GatingTreeObject
 #' @param path A character vector specifying the path through the gating hierarchy.
 #'
 #' @return A ggplot object representing the node percentage scatter plot with
@@ -37,6 +37,9 @@
 
 
 PlotNodeScatterPlot <- function(x, path){
+    if(length(x@Gating$GatingTreeObject)==0){
+        stop("Apply GatingTree analysis. \n")
+    }
     
     node  <-  x@Gating$GatingTreeObject
     unique_maxima_df <- x@Gating$GatingTreeDF

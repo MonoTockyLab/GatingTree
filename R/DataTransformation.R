@@ -12,11 +12,11 @@
 # limitations under the License.
 
 #' Log fluorescence data
-#' @param x A FlowObject containing non-logged, raw fluorescence data
+#' @param x A FlowObject or TockyPrepData containing non-logged, raw fluorescence data
 #' @param graphics Whether to use a graphic device to choose variables for log transformation.
 #' @param prompt Whether to invoke a prompt for asking optional questions.
 #' @param variables A character vector for defining the variables to be log-transformed.
-#' @return logged data. FlowObject will include the slot  logdata_parameters in the slot Transformation, which includes a list object of logged channel names and parameter s used for log transformation: x_log = log10 (x - s + 1)
+#' @return logged data. FlowObject will include the slot  logdata_parameters in the slot Transformation, which includes a list object of logged channel names.
 #' @export
 #' @examples
 #' \dontrun{
@@ -24,15 +24,31 @@
 #'}
 #' @family Data Transformation
 
+
 LogData <- function(x, graphics = TRUE, variables = NULL, prompt = FALSE){
-    if(inherits(x,'FlowObject')){
-        
+    
+    if(inherits(x,'FlowObject')|inherits(x,'TockyPrepData')){
         data <- x@Data
     }
-    
-    if(is.data.frame(x)){
-        data <- x
+
+    logTransformData <- function(data) {
+        logSingleData <- function(x) {
+          x_log <- numeric(length(x))
+          logic <- x > 1
+          x_log[logic] <- log10(x[logic])
+          x_log[!logic] <- 0
+          return(x_log)
+        }
+        
+      cols <- ncol(data)
+      
+      for (i in 1:cols) {
+        current_column <- data[, i]
+        data[, i] <- logSingleData(current_column)
+      }
+      data
     }
+
     
     if(prompt){
         if(length(x@Transformation$logdata_parameters)!=0){
@@ -57,7 +73,7 @@ LogData <- function(x, graphics = TRUE, variables = NULL, prompt = FALSE){
     }
 
     
-    if(!inherits(x,'FlowObject')){stop("Input should be a FlowObject")
+    if(!inherits(x,'FlowObject')&& !inherits(x,'TockyPrepData')){stop("Input should be a FlowObject or TockyPrepData. ")
         }
         
         choices <- colnames(data)
@@ -78,10 +94,9 @@ LogData <- function(x, graphics = TRUE, variables = NULL, prompt = FALSE){
 
         data_logged <- data[,selected]
         
-        s <- rep(0, ncol(data_logged))
         data_logged <- as.matrix(data_logged)
         
-        data_logged <- logTransformData(data_logged, 0.005, 0)
+        data_logged <- logTransformData(data_logged)
         
         if(prompt){
             ans <- askYesNo("Do you want to name your channel data? \n")
@@ -113,12 +128,10 @@ LogData <- function(x, graphics = TRUE, variables = NULL, prompt = FALSE){
             
         }
 
-
            out <- x
            out@Data <- data_logged
            out@Transformation$logdata_parameters <- list(
-                logged.channel = selected,
-                s = s)
+                logged.channel = selected)
                 
            return(out)
 
@@ -171,6 +184,7 @@ NormAF <- function(x, var = NULL, plot = FALSE) {
     
     neg_gate_def <- x@QCdata$negative_gate_def
     neg_gate_def <- as.data.frame(neg_gate_def)
+    row.names(negative_gate_def) <- negative_gate_def$variable
     choices <- neg_gate_def$variable[neg_gate_def$negative.gate !=0]
     data <- x@Data[,choices]
     num_vars <- ncol(data)
@@ -226,7 +240,7 @@ NormAF <- function(x, var = NULL, plot = FALSE) {
 
     
     if(plot){
-        pdf(paste0(output, '/ModerateExtremeNegatives_thresholds.pdf'))
+
         par(mfrow = c(n,n))
         for (i in 1:nrow(neg_gate_def)) {
             channel_name <- neg_gate_def$variable[i]
@@ -262,7 +276,7 @@ NormAF <- function(x, var = NULL, plot = FALSE) {
           plot(x_var, y_var, xlab = var_name[i], ylab = var_name[i+1], main=paste(var_name[i], "vs", var_name[i+1]), pch = '.')
           abline(v = neg_gate_def[var_name[i],2], h = neg_gate_def[var_name[i+1],2], col = 2)
         }
-        dev.off()
+
     }else{
         for (i in 1:nrow(neg_gate_def)) {
             channel_name <- neg_gate_def$variable[i]
@@ -302,13 +316,11 @@ NormAF <- function(x, var = NULL, plot = FALSE) {
 #' }
 #' @family Data Transformation
 
-
 DefineNegatives <- function(x, select = TRUE, max_cells_displayed = 30000, y_axis_var = NULL, pseudocolour = TRUE) {
     if (!inherits(x, "FlowObject")) {
         stop("Input must be a FlowObject.")
     }
 
-    # Extract data and verify required components
     data <- x@Data
     if (is.null(x@Transformation$logdata_parameters$logged.channel)) {
         stop("No logged channels found in x@Transformation$logdata_parameters$logged.channel.")
@@ -316,7 +328,6 @@ DefineNegatives <- function(x, select = TRUE, max_cells_displayed = 30000, y_axi
     logged_channels <- x@Transformation$logdata_parameters$logged.channel
     logged_channel_fullnames <- paste(logged_channels, 'logdata', sep = '.')
 
-    # Initialize negative_gate_def if necessary
     if (is.null(x@QCdata$negative_gate_def)) {
         x@QCdata$negative_gate_def <- data.frame(
             variable = logged_channel_fullnames,
@@ -360,19 +371,16 @@ DefineNegatives <- function(x, select = TRUE, max_cells_displayed = 30000, y_axi
     cat("Using y-axis variable:", y_axis_var, "\n")
     y.data <- data[[y_axis_var]]
 
-    # Set sample size
     sample_size <- min(max_cells_displayed, nrow(data))
-
     selected_gates <- list()
 
-    # Interactive gating for each marker
+
     for (channel in var) {
         if (!channel %in% colnames(data)) {
             warning("Channel", channel, "not found in data. Skipping.")
             next
         }
 
-        # Sample data if necessary
         if (nrow(data) <= sample_size) {
             tmpdata <- data[[channel]]
             ty <- y.data
@@ -384,7 +392,6 @@ DefineNegatives <- function(x, select = TRUE, max_cells_displayed = 30000, y_axi
         channel_original <- channel
         channel <- sub(channel, pattern = '.logdata', replacement = ' (log)')
 
-        # Interactive gating loop
         repeat {
             if (y_axis_var == 'Density') {
                 plot(density(tmpdata), main = paste("Density of", channel), xlab = channel, ylab = "Density")
@@ -423,28 +430,26 @@ DefineNegatives <- function(x, select = TRUE, max_cells_displayed = 30000, y_axi
     }
 
 
-    # After gates have been selected interactively...
     if (length(selected_gates) > 0) {
-        # Create a data frame from selected gates
+
         final_gates <- data.frame(
             variable = names(selected_gates),
             negative.gate = unlist(selected_gates),
             stringsAsFactors = FALSE
         )
 
-        # Update existing entries or add new ones
         existing_vars <- x@QCdata$negative_gate_def$variable
         for (i in seq_along(final_gates$variable)) {
             var_name <- final_gates$variable[i]
             if (var_name %in% existing_vars) {
-                # Update the existing entry
+
                 x@QCdata$negative_gate_def$negative.gate[existing_vars == var_name] <- final_gates$negative.gate[i]
             } else {
-                # Add new entry
+
                 x@QCdata$negative_gate_def <- rbind(x@QCdata$negative_gate_def, final_gates[i, ])
             }
         }
-        # Reset the row names after updating
+
         rownames(x@QCdata$negative_gate_def) <- NULL
     } else {
         warning("No gates were defined.")
@@ -513,6 +518,7 @@ export_negative_gate_def <- function(x, filename = 'negative_gate_def.csv') {
 #' @param y_axis_var The variable to use for the y-axis in the generated plots, or 'Density' to use a density plot.
 #' @param output If TRUE, plots are generated as a file. The default is FALSE and shows plots in X window.
 #' @param panel The number of panels to be included. If NULL, all panels are included in the output plot.
+#' @param variables The variables to be plotted. The default is NULL, showing all variable data.
 #' @param outputFile When output is TRUE, this defines the filename of the output file.
 #' @return The same FlowObject is returned for safety.
 #' @export
@@ -522,7 +528,7 @@ export_negative_gate_def <- function(x, filename = 'negative_gate_def.csv') {
 #'}
 #' @family Data Transformation
 
-PlotDefineNegatives <- function(x, y_axis_var = NULL, output = FALSE, outputFile = "DefineNegativePlot.pdf", panel = NULL){
+PlotDefineNegatives <- function(x, y_axis_var = NULL, output = FALSE, outputFile = "DefineNegativePlot.pdf", panel = NULL, variables = NULL){
     if(!inherits(x, "FlowObject")){
         stop("Use a FlowObject for x. \n")
     }
@@ -533,6 +539,11 @@ PlotDefineNegatives <- function(x, y_axis_var = NULL, output = FALSE, outputFile
 
     
     data <- x@QCdata$negative_gate_def
+    
+    if(!is.null(variables)){
+        data <- data[data$variable %in% variables, ]
+        
+    }
     
     if (is.null(y_axis_var)) {
         choices <- colnames(x@Data)[!grepl(colnames(x@Data), pattern = 'file')]
@@ -634,6 +645,7 @@ PlotDefineNegatives <- function(x, y_axis_var = NULL, output = FALSE, outputFile
 #'}
 #'
 #' @keywords internal
+#' @noRd
 
 moderate_negative <- function(expression, neg, main, plot = TRUE){
     
@@ -668,11 +680,6 @@ moderate_negative <- function(expression, neg, main, plot = TRUE){
 
     return(expression)
 }
-
-
-
-
-
 
 
 
@@ -729,7 +736,26 @@ PlotNormAF <- function(x, graphics = FALSE, max_cells_displayed = 30000, output 
     variable_logged <- paste(variable_chosen, '.logdata', sep= '')
 
     rawdata <- as.matrix(x@QCdata$rawData[,variable_logged])
-    raw_logged <- logTransformData(rawdata, 0.005, 0)
+    
+    logTransformData <- function(data) {
+        logSingleData <- function(x) {
+          x_log <- numeric(length(x))
+          logic <- x > 1
+          x_log[logic] <- log10(x[logic])
+          x_log[!logic] <- 0
+          return(x_log)
+        }
+        
+      cols <- ncol(data)
+      
+      for (i in 1:cols) {
+        current_column <- data[, i]
+        data[, i] <- logSingleData(current_column)
+      }
+      data
+    }
+
+    raw_logged <- logTransformData(rawdata)
     af_logged <- x@Data[,variable_logged]
     
     

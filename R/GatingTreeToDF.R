@@ -34,7 +34,6 @@
 #' @importFrom stats setNames
 #' @family GatingTree
 
-
 GatingTreeToDF <- function(x){
     if(inherits(x,'FlowObject')){
         node <- x@Gating$GatingTreeObject
@@ -98,6 +97,7 @@ GatingTreeToDF <- function(x){
             names(delta_E)[i] <- paste(names(current_enrichments), collapse = '_')
         }
     }
+
     
     marker_deltas <- list()
     for (i in 1:length(delta_E)) {
@@ -114,12 +114,8 @@ GatingTreeToDF <- function(x){
         data.frame(marker = marker, delta = marker_deltas[[marker]])
     }))
     
-    rownames(delta_df) <- NULL
-    delta_df <- do.call(rbind, lapply(names(marker_deltas), function(marker) {
-        data.frame(marker = marker, delta = marker_deltas[[marker]])
-    }))
-    
-    rownames(delta_df) <- NULL
+   # rownames(delta_df) <- NULL
+
     
     process_enrichment <- function(enrichment, index, entropies) {
         max_value <- max(enrichment)
@@ -186,7 +182,6 @@ GatingTreeToDF <- function(x){
 #' @importFrom rlang sym
 #' @family GatingTree
 
-
 PlotDeltaEnrichment <- function(x){
     marker_deltas_df <- x@Gating$GatingTree$delta_df
     kruskal_test_delta <- kruskal.test(marker_deltas_df[['DeltaE_value']] ~ marker_deltas_df[['Marker']])
@@ -220,7 +215,7 @@ PlotDeltaEnrichment <- function(x){
     markers <- gsub("(.logdata)|[,]", "", gsub("[.](pos)", "+", markers))
     markers <- gsub("(.logdata)|[,]", "", gsub("[.](neg)", "-", markers))
     marker_deltas_df$Marker <- factor(markers, levels = summary_table$Marker[order(-summary_table$MeanDeltaE_value)])
-    
+
     p <- ggplot(marker_deltas_df, aes(x = !!sym("Marker"), y = !!sym("DeltaE_value"), fill = !!sym("Marker"))) +
     geom_boxplot()+
     labs(title = "Delta(Enrichment) Values for Each Marker",
@@ -237,6 +232,7 @@ PlotDeltaEnrichment <- function(x){
 #' Plot Delta Enrichment or Interaction Effects for Each Marker Using Pruned GatingTree
 #'
 #' @param x FlowObject after applying PruneGatingTree.
+#' @param q A numeric value between 0 and 1 as a quantile threshold for extracting top markers.
 #' @return Returns the object `x` with statistical values
 #' @details The function conducts Kruskal-Wallis tests to determine the significance of
 #'   differences across markers, followed by Dunn's test for post-hoc analysis with Bonferroni
@@ -251,13 +247,14 @@ PlotDeltaEnrichment <- function(x){
 #' @importFrom rlang sym
 #' @family GatingTree
 
-PlotDeltaEnrichmentPrunedTree <- function(x){
+PlotDeltaEnrichmentPrunedTree <- function(x, q = 0){
     if(length(x@Gating$PrunedGatingTreeObject)==0){
         stop('Apply PruneGatingTree before using this function. \n')
         
     }
-    node <- x@Gating$PrunedGatingTreeObject
     
+    node <- x@Gating$PrunedGatingTreeObject
+  
     enrichments <- collect_all_enrichment(node)
     entropies <- collect_all_entropy(node)
     d_values <- sapply(enrichments, function(x) x[1], simplify = FALSE)
@@ -331,13 +328,6 @@ PlotDeltaEnrichmentPrunedTree <- function(x){
         data.frame(marker = marker, delta = marker_deltas[[marker]])
     }))
     
-    rownames(delta_df) <- NULL
-    delta_df <- do.call(rbind, lapply(names(marker_deltas), function(marker) {
-        data.frame(marker = marker, delta = marker_deltas[[marker]])
-    }))
-    
-    rownames(delta_df) <- NULL
-    
     process_enrichment <- function(enrichment, index, entropies) {
         max_value <- max(enrichment)
         max_position <- which.max(enrichment)
@@ -403,12 +393,24 @@ PlotDeltaEnrichmentPrunedTree <- function(x){
     markers <- gsub("(.logdata)|[,]", "", gsub("[.](neg)", "-", markers))
     marker_deltas_df$Marker <- factor(markers, levels = summary_table$Marker[order(-summary_table$MeanDeltaE_value)])
     
+    
+    if(!is.null(q) && is.numeric(q) && length(q)==1 && q >=0 & q <= 1 ){
+        quantile_val <- tapply(marker_deltas_df$DeltaE_value, marker_deltas_df$Marker, mean)
+        threshold_q <- quantile(quantile_val, q)
+        sel_markers <- names(quantile_val[quantile_val > threshold_q])
+        logic <- marker_deltas_df$Marker %in% sel_markers
+        marker_deltas_df <- marker_deltas_df[logic, ]
+        
+        
+    }
+    
+    
     p <- ggplot(marker_deltas_df, aes(x = !!sym("Marker"), y = !!sym("DeltaE_value"), fill = !!sym("Marker"))) +
     geom_boxplot()+
     labs(title = "Delta(Enrichment) Values for Each Marker",
     x = "Marker",
     y = "Delta Value") +
-    theme_minimal() +
+    theme_bw() +
     theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x labels for clarity
     plot(p)
     
@@ -438,9 +440,9 @@ PlotDeltaEnrichmentPrunedTree <- function(x){
 #' }
 #' @keywords internal
 #' @family GatingTree
+#' @noRd
 
-
-add_prune <- function(node,  min_average_proportion = 0.001, theta = 0.02) {
+add_prune <- function(node,  min_average_proportion = 0.001, theta = 0) {
     if(!is.null(node$CurrentNodeName) && node$CurrentNodeName=='rootNode'){
         node[['prune']] <- FALSE
     }
@@ -477,6 +479,7 @@ add_prune <- function(node,  min_average_proportion = 0.001, theta = 0.02) {
 #' }
 #' @keywords internal
 #' @family GatingTree
+#' @noRd
 
 prune_tree <- function(node) {
     # Remove node if it's marked for pruning
@@ -514,7 +517,7 @@ prune_tree <- function(node) {
 #' }
 #' @keywords internal
 #' @family GatingTree
-
+#' @noRd
 
 find_and_update_nodes <- function(node, path = NULL, res_df) {
     if (is.null(path)) path <- c()
@@ -547,6 +550,8 @@ find_and_update_nodes <- function(node, path = NULL, res_df) {
 #' the nodes based on entropy, enrichment, and average proportion metrics. Nodes that
 #' do not meet the specified criteria are pruned from the tree. Additionally, p-values
 #' are adjusted for multiple comparisons.
+#' In the current implementation the output PrunedGatingTreeNodePercentages will have
+#' nodes filtered only through a threshold for average proportion.
 #'
 #' @param x An object, expected to be of class 'FlowObject', containing
 #'   gating tree data and metadata.
@@ -571,11 +576,13 @@ find_and_update_nodes <- function(node, path = NULL, res_df) {
 #' \dontrun{
 #'   updated_object <- PruneGatingTree(x, min_enrichment = 0.5,max_entropy =0.5)
 #' }
+#' @importFrom dplyr count full_join mutate coalesce
+#' @importFrom rlang sym
 #' @export
 #' @family GatingTree
 
 
-PruneGatingTree <- function(x, max_entropy =0.9, min_enrichment = 0.1, min_average_proportion = 0.001, p_adjust_method = 'BY', theta = 0){
+PruneGatingTree <- function(x, max_entropy =0.9, min_enrichment = 0.1, min_average_proportion = 0.001, p_adjust_method = 'BY', theta = NULL){
     
     if(length(x@Gating$GatingTreeDF)==0){
         stop('Apply GatingTreeToDF before using this function. \n')
@@ -593,7 +600,7 @@ PruneGatingTree <- function(x, max_entropy =0.9, min_enrichment = 0.1, min_avera
     total_cell_per_file <- data.frame(file = names(total_cell_per_file), total = as.vector(total_cell_per_file))
     average_proportion <- p_value_vec <- rep(0, nrow(unique_maxima_df))
     percent_list <- as.list(p_value_vec)
-    names(percent_list) <- unique_maxima_df$combination
+    names(percent_list) <- unique_maxima_df$markers_up_to_max#combination
     
     for(k in 1:nrow(unique_maxima_df)){
         path <- unique_maxima_df$markers_up_to_max[k]
@@ -601,30 +608,35 @@ PruneGatingTree <- function(x, max_entropy =0.9, min_enrichment = 0.1, min_avera
         
         tmp <- findNodeByPath(node, path)
         node_data <- rootdata[rootdata$indices %in% tmp$CurrentNodeIndices,]
-        total_cell_num <- table(node_data$file)
-        if(nrow(total_cell_num) < nrow(sampledef)){
-            p_value_vec = NA
-            average_proportion = NA
-        }else{
-            total_cell_num <- data.frame(file = names(total_cell_num), node_total = as.vector(total_cell_num))
-            total_cell_num <- merge(total_cell_num, data.frame( total_cell_per_file), by = 'file')
-            total_cell_num <- merge(total_cell_num, sampledef, by = 'file')
-            total_cell_num$node_percentage <- total_cell_num$node_total/total_cell_num$total
-            percent_list[[k]] <- total_cell_num
-            p_value_vec[k] = p_value = wilcox.test(data = total_cell_num, node_percentage~group)$p.value
-            average_proportion[k] <- mean(total_cell_num$node_percentage)
-        }
-        
+        total_cell_num <- node_data %>%
+          count(file, name = "node_total") %>%
+          full_join(data.frame(total_cell_per_file), by = "file") %>%
+          full_join(sampledef, by = "file") %>%
+          mutate(node_total = coalesce(!!sym("node_total"), 0),  # Replace NA values with 0
+                 node_percentage = !!sym("node_total") / !!sym("total"))
+                 
+        percent_list[[k]] <- total_cell_num
+        p_value_vec[k] = p_value = wilcox.test(data = total_cell_num, node_percentage~group)$p.value
+        total_cell_num$node_percentage[is.na(total_cell_num$node_percentage)] <- 0
+        average_proportion[k] <- mean(total_cell_num$node_percentage)
         
     }
-    
+
     res_df <- cbind(unique_maxima_df, data.frame(p_value = p_value_vec, average_proportion = average_proportion))
-    res_df <- res_df[!is.na(res_df$p_value),]
+   # res_df <- res_df[!is.na(res_df$p_value),]
     res_df[['p_adjust']] <- p.adjust(res_df$p_value, method = p_adjust_method)
     
-    pruned_node <- add_prune(node, min_average_proportion = min_average_proportion, theta)
-    pruned_node <- find_and_update_nodes(pruned_node, res_df = res_df)
-    pruned_node <- prune_tree(pruned_node)
+    if(!is.null(min_average_proportion) && !is.null(theta)){
+        pruned_node <- add_prune(node, min_average_proportion = min_average_proportion, theta = theta)
+        
+    }else{
+        if(!is.null(min_average_proportion) && is.null(theta)){
+            pruned_node <- add_prune(node, min_average_proportion = min_average_proportion, theta = 0)
+        }else{
+            pruned_node <- add_prune(node, min_average_proportion = 0, theta = 0)
+        }
+    }
+    
     
     tree_to_df <- function(node){
         enrichments <- collect_all_enrichment(node)
@@ -636,7 +648,7 @@ PruneGatingTree <- function(x, max_entropy =0.9, min_enrichment = 0.1, min_avera
             markers_up_to_max <- names(enrichment)[1:max_position]
             markers_sorted <- sort(markers_up_to_max)
             combination_name <- paste(markers_sorted, collapse = "_")
-            markers_up_to_max = paste(markers_up_to_max, collapse= '_')
+            markers_up_to_max <- paste(markers_up_to_max, collapse= '_')
             
             corresponding_entropy <- entropies[[index]][max_position]
             
@@ -656,16 +668,39 @@ PruneGatingTree <- function(x, max_entropy =0.9, min_enrichment = 0.1, min_avera
         return(maxima_df)
     }
     
-    
     df <- tree_to_df(pruned_node)
+    res_df <- res_df[res_df$markers_up_to_max %in% df$markers_up_to_max,]#[res_df$combination %in% df$combination,]
+    
+    
+    
+    logic <- res_df$max_enrichment > min_enrichment & res_df$entropy < max_entropy & res_df$average_proportion >= min_average_proportion
 
     
-    res_df <- res_df[res_df$combination %in% df$combination,]
-    
+    pruned_node <- find_and_update_nodes(pruned_node, res_df = res_df)
+    pruned_node <- prune_tree(pruned_node)
+
     x@Gating$PrunedGatingTreeObject <- pruned_node
     x@Gating$PrunedGatingTreeDF <- res_df
     
+    sampledef$file <- as.character(sampledef$file)
+    extract_and_merge <- function(df, idx) {
+        df$file <- as.character(df$file)
+        merged_df <- merge(sampledef, df[, c("file", "node_percentage")], by = "file", all.x = TRUE)
+        names(merged_df)[names(merged_df) == "node_percentage"] <-idx
+        return(merged_df[, c("file", idx)])
+    }
+    
+    merged_df <- sampledef
+    for(i in 1:length(percent_list)){
+        tdf <- percent_list[[i]]
+        colnames(tdf)[colnames(tdf)=='node_percentage'] <- names(percent_list)[i]
+        merged_df <- merge(merged_df, tdf[, c("file", names(percent_list)[i])], by = "file", all.x = TRUE)
+    }
+    
+    x@Gating$PrunedGatingTreeNodePercentages <- merged_df
+    
     return(x)
+    
 }
 
 #' Extract All Nodes from GatingTree
@@ -710,6 +745,7 @@ extractNodes <- function(x, pruned = FALSE) {
 #'   `isRoot`, `name`, `CurrentEnrichment`, `CurrentEntropy`, and optionally `AverageProportion`.
 #' @param size_factor A multiplier for node sizes in the graph, allowing customization based on
 #'   enrichment or average proportion values.
+#' @param fontsize The size of font to be used in the graph.
 #' @param average_proportion A logical flag indicating whether to use the average proportion
 #'   of nodes to adjust node sizes and color gradient based on enrichment values.
 #' @param all_labels Logical. If TRUE, all parameters are included in each node within the output graph.
@@ -727,53 +763,48 @@ extractNodes <- function(x, pruned = FALSE) {
 #' }
 #' @export
 #' @importFrom DiagrammeR create_graph add_node add_edge render_graph
-#' @family GatingTree
+#' @family GatingTree Visualization
 
-convert_to_diagrammer <- function(root, size_factor = 1, average_proportion = FALSE, all_labels = TRUE) {
+convert_to_diagrammer <- function(root, size_factor = 1, fontsize = 12, average_proportion = FALSE, all_labels = TRUE) {
     graph <- create_graph(directed = TRUE)
     node_index <- 1 # To keep track of nodes
-    add_nodes_recursively <- function(node) {
-        if(node$isRoot){
-            simplified_name <- "Root"
-            label_text <- ''
-            
-            node_size <-  size_factor *0.1
+    add_nodes_recursively <- function(node, parent_index = NULL) {
+        if(node$isRoot) {
+            label_text <- 'Root'
+            node_size <- size_factor * 0.1
             tmp <- 0
-
             color_value <- rgb(tmp, 0, 1-tmp, alpha = tmp)  # Red gradient
 
             graph <<- add_node(graph, label = label_text,
-                               node_aes = list(title = node$name, fillcolor=color_value, width = node_size, fontcolor = 'black'))
-        }
-         if (!node$isRoot) {
-             if(all_labels){
-                formatted_entropy <- round(node$CurrentEntropy, 2)
-                if (abs(formatted_entropy) < 0.001) formatted_entropy <- 0
-                simplified_name <- gsub("(.logdata)|[,]", "", gsub("[.](pos)$", "+", node$name))
-                simplified_name <- gsub("(.logdata)|[,]", "", gsub("[.](neg)$", "-", simplified_name))
-                label_text <- sprintf("%s\nEnrichment: %.2f\nEntropy: %.2f\nAvg. %%: %.1f%%", simplified_name, node$CurrentEnrichment, formatted_entropy, node$AverageProportion * 100)
-            }else{
-                simplified_name <- gsub("(.logdata)|[,]", "", gsub("[.](pos)$", "+", node$name))
-                simplified_name <- gsub("(.logdata)|[,]", "", gsub("[.](neg)$", "-", simplified_name))
-                label_text <- simplified_name
+                               node_aes = list(title = node$name, fillcolor=color_value, width = node_size, fontcolor = 'black', fontsize = fontsize))
+        } else {
+            formatted_entropy <- round(node$CurrentEntropy, 2)
+            if (abs(formatted_entropy) < 0.001) formatted_entropy <- 0
+            simplified_name <- gsub("(.logdata)|[,]", "", gsub("[.](pos)$", "+", node$name))
+            simplified_name <- gsub("(.logdata)|[,]", "", gsub("[.](neg)$", "-", simplified_name))
 
+            label_text <- if (all_labels) {
+                sprintf("%s\nEnrichment: %.2f\nEntropy: %.2f\nAvg. %%: %.1f%%", simplified_name, node$CurrentEnrichment, formatted_entropy, node$AverageProportion * 100)
+            } else {
+                simplified_name
             }
-            if(average_proportion){
-                node_size <-  size_factor*node$AverageProportion
+
+            if(average_proportion) {
+                node_size <- size_factor * node$AverageProportion
                 tmp <- node$CurrentEnrichment
                 tmp <- max(tmp, 0)
                 tmp <- pmin(tmp, 1)
                 color_value <- rgb(tmp, 0, 1-tmp, alpha = tmp)
-            }else{
-                node_size <-  size_factor*node$CurrentEnrichment
+            } else {
+                node_size <- size_factor * node$CurrentEnrichment
                 tmp <- node$CurrentEntropy
                 tmp <- max(tmp, 0)
                 tmp <- pmin(tmp, 1)
-                color_value <- rgb(1-tmp, 0, tmp, alpha = (1-tmp)/1.5)
+                color_value <- rgb(1-tmp, 0, tmp, alpha = (1-tmp) / 1.5)
             }
 
             graph <<- add_node(graph, label = label_text,
-                               node_aes = list(title = node$name, fillcolor=color_value, width = node_size, fontcolor = 'black'))
+                               node_aes = list(title = node$name, fillcolor=color_value, width = node_size, fontcolor = 'black', fontsize = fontsize))
 
             if (!is.null(parent_index)) {
                 graph <<- add_edge(graph, from = parent_index, to = node_index)
@@ -784,13 +815,14 @@ convert_to_diagrammer <- function(root, size_factor = 1, average_proportion = FA
         if (!node$isLeaf) {
             for (child in node$children) {
                 parent_index <<- current_index
-                add_nodes_recursively(child)
+                add_nodes_recursively(child, current_index)
             }
         }
     }
     add_nodes_recursively(root)
     return(graph)
 }
+
 
 #' Collect All Enrichment Values Recursively
 #'
@@ -811,6 +843,7 @@ convert_to_diagrammer <- function(root, size_factor = 1, average_proportion = FA
 #' }
 #' @keywords internal
 #' @family GatingTree
+#' @noRd
 
 collect_all_enrichment <- function(tree) {
   enrichment_list <- list()
@@ -868,7 +901,7 @@ collect_peak_nodes <- function(tree) {
 #' }
 #' @keywords internal
 #' @family GatingTree
-
+#' @noRd
 
 collect_all_entropy <- function(tree) {
   entropy_list <- list()
@@ -890,5 +923,95 @@ collect_all_entropy <- function(tree) {
 
 
 
+#' Update Gating Tree Nodes Based on Valid Paths
+#'
+#' This function traverses a gating tree and flags nodes for pruning if their
+#' combination (derived from the node's current path) is not present in a given set
+#' of valid paths. The function recursively updates each child node, and if any child node
+#' is retained (i.e., not pruned), the parent node is also retained.
+#'
+#' @param node A node object from a gating tree. The node should contain a \code{CurrentPath}
+#'   field (a character vector) and a \code{Children} list.
+#' @param paths A character vector of valid node combination strings (paths) that should
+#'   be retained. Nodes whose combination is not in this vector will be flagged with \code{prune = TRUE}.
+#'
+#' @return The updated node object with its \code{prune} flag set to \code{TRUE} for nodes
+#'   not in the valid paths and \code{FALSE} for nodes that are valid or have valid descendants.
+#'
+#' @examples
+#' \dontrun{
+#' # Define valid paths (e.g., combinations of markers) to keep:
+#' valid_paths <- c("CD4.logdata.pos_CD8.logdata.neg", "CD4.logdata.pos_CD19.logdata.pos")
+#' # Update the gating tree starting from the root node:
+#' updated_tree <- update_nodes_by_paths(rootNode, valid_paths)
+#' }
+#'
+#' @keywords internal
+#' @family GatingTree
+#' @noRd
+update_nodes_by_paths <- function(node, paths) {
+    if (!is.null(node$CurrentPath)) {
+        current_combination <- paste(node$CurrentPath[-1], collapse = "_")
+    } else {
+        current_combination <- ""
+    }
+    if (current_combination %in% paths) {
+        node$prune <- FALSE
+    } else {
+        node$prune <- TRUE
+    }
+    if (!is.null(node$Children) && length(node$Children) > 0) {
+        for (child_name in names(node$Children)) {
+            node$Children[[child_name]] <- update_nodes_by_paths(node$Children[[child_name]], paths)
+            if (!node$Children[[child_name]]$prune) {
+                node$prune <- FALSE
+            }
+        }
+    }
+    
+    return(node)
+}
 
 
+
+#' Extract and Finalize the Gating Tree Object
+#'
+#' This function performs a tree extraction by specifying node paths. The resulting tree will be stored in the \code{ExtractedGatingTreeObject} slot
+#' of the FlowObject.
+#'
+#' @param x A FlowObject that has been previously processed with \code{GatingTreeToDF}
+#'   and contains gating information in the \code{Gating} slot, including
+#'   \code{GatingTreeDF} and \code{PrunedGatingTreeObject}.
+#' @param node_paths A character vector of node paths to be used in the extraction
+#'   process.
+#'
+#' @return The updated FlowObject with a new slot \code{Gating$ExtractedGatingTreeObject}
+#'   containing the final, pruned gating tree.
+#'
+#' @details
+#' Node paths should use the format in GatingTreeDF's \code{markers_up_to_max} slot.
+#'
+#' @examples
+#' \dontrun{
+#' # Assume 'x' is a FlowObject that has been processed with GatingTreeToDF and PruneGatingTree:
+#' x <- ExtractGatingTree(x, node_paths = c("CD4.logdata.pos_CD8.logdata.neg",
+#' "CD4.logdata.pos_CD19.logdata.pos"))
+#' }
+#'
+#' @export
+#' @family GatingTree
+ExtractGatingTree <- function(x, node_paths){
+    
+    if(length(x@Gating$GatingTreeDF)==0){
+        stop('Apply GatingTreeToDF before using this function. \n')
+    }
+    
+    node <- x@Gating$PrunedGatingTreeObject
+    pruned_node <- update_nodes_by_paths(node = node, paths = node_paths)
+    pruned_node <- prune_tree(pruned_node)
+    
+    x@Gating$ExtractedGatingTreeObject <- pruned_node
+    
+    return(x)
+    
+}

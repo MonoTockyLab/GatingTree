@@ -12,3 +12,10 @@
 - **PlotDeltaEnrichment** and **PlotDeltaEnrichmentPrunedTree**: 
 - The option `significant` has been removed.
 - Instead, a new function `PlotDeltaEnrichmentPrunedTree` is now available, which is more powerful in assessing the impacts of important markers.
+
+
+## Changes in Version 0.1.1 (2024-11-17)
+
+- **PlotDeltaEnrichment** and **PlotDeltaEnrichmentPrunedTree**: 
+- The option `significant` has been removed.
+- Instead, a new function `PlotDeltaEnrichmentPrunedTree` is now available, which is more powerful in assessing the impacts of important markers.
