@@ -2,8 +2,10 @@
 
 ## Changes in Version 0.2.0 (2025-03-23)
 - **New Features**:
-  - **GatingTreeRandomForest**: Added functionality to apply Random Forest analysis to GatingTree node data.
+  - **GatingTreeRandomForest**: New function to apply Random Forest analysis to GatingTree node data.
   - **predictGatingTreeRandomForest**: New function to perform predictions using models built with GatingTreeRandomForest.
+  - **AnalyzeNodeOverlaps**: New function to analyze the percentage of cells shared between nodes, aiding in the unsupervised analysis of GatingTree node data.
+  - **ExtractTopNodes**: New function designed to extract top nodes from node clusters, enhancing the unsupervised approach in node analysis.
 
 ## Changes in Version 0.1.1 (2024-11-17)
 - **Enhancements**:

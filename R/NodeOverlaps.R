@@ -26,10 +26,10 @@
 #' @examples
 #' \dontrun{
 #' # Basic usage with default settings
-#' AnalyzeNodeOvealaps(x)
+#' AnalyzeNodeOverlaps(x)
 #'
 #' # Select nodes interactively
-#' AnalyzeNodeOvealaps(x, select_nodes = TRUE)
+#' AnalyzeNodeOverlaps(x, select_nodes = TRUE)
 #' }
 #' @importFrom gplots heatmap.2
 #' @importFrom grDevices dev.new topo.colors
@@ -37,7 +37,7 @@
 #' @importFrom utils select.list
 #' @family Unsupervised GatingTree Analysis
 
-AnalyzeNodeOvealaps <- function(x, select_nodes = FALSE, n = NULL, graphics = TRUE, margin = 8, parameter = NULL){
+AnalyzeNodeOverlaps <- function(x, select_nodes = FALSE, n = NULL, graphics = TRUE, margin = 8, parameter = NULL){
 
     if(length(x@Gating$PrunedGatingTreeDF)==0){
         stop("Apply GatingTree analysis and Prune your tree before using this function. \n")
